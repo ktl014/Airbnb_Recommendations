@@ -3,12 +3,17 @@
 # Standard dist
 import os
 import pickle
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # Third party imports
 import pandas as pd
 import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report, precision_recall_fscore_support
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelBinarizer
+from sklearn.metrics import make_scorer
 
 # Project level imports
 from data.d_utils import read_in_dataset
@@ -18,14 +23,16 @@ DATA_DIR = '../airbnb-recruiting-new-user-bookings'
 # Select dataset type
 # DATASET_TYPE = 'processed'
 # DATASET_TYPE = 'feat_eng'
-DATASET_TYPE = 'merged_sessions'
+DATASET_TYPE = 'part-merged_sessions'
 CSV_FNAMES = {
     'train-processed': os.path.join(DATA_DIR, 'train_users_2-processed.csv'),
     'test-processed': os.path.join(DATA_DIR, 'test_users-processed.csv'),
     'train-feat_eng': os.path.join(DATA_DIR, 'train_users_2-feature_eng.csv'),
     'test-feat_eng': os.path.join(DATA_DIR, 'test_users-feature_eng.csv'),
     'train-merged_sessions': os.path.join(DATA_DIR, 'train_users-merged_sessions.csv'),
-    'test-merged_sessions': os.path.join(DATA_DIR, 'test_users-merged_sessions.csv')
+    'test-merged_sessions': os.path.join(DATA_DIR, 'test_users-merged_sessions.csv'),
+    'train-part-merged_sessions': os.path.join(DATA_DIR, 'train_users-part-merged_sessions.csv'),
+    'val-part-merged_sessions': os.path.join(DATA_DIR, 'val_users-part-merged_sessions.csv')
 }
 
 def main():
@@ -36,7 +43,8 @@ def main():
     # Set up dataset
     class AirBnB(): pass
     airbnb = AirBnB()
-    airbnb.X_test = read_in_dataset(CSV_FNAMES['test-{}'.format(DATASET_TYPE)], verbose=True)
+    airbnb.X_test = read_in_dataset(CSV_FNAMES['test-{}'.format(DATASET_TYPE)],
+                                    keep_id=True, verbose=True)
     airbnb.test_id = airbnb.X_test.pop('id')
     airbnb.X_test.pop('country_destination')
 
@@ -97,25 +105,9 @@ def precision_recall(gtruth, predictions, manual=False):
 def evaluate_model(gtruth, predictions, verbose=True, normalize=True, beta=0):
     """Compute all relevant evaluation metrics for a given model"""
     metrics = {}
-    metrics['acc'] = accuracy(gtruth, predictions)
-    metrics['cm'] = confusion_matrix(gtruth, predictions)
-    if normalize:
-        np.set_printoptions(precision=3, suppress=True)
-        metrics['cm'] = metrics['cm'].astype('float') / metrics['cm'].sum(axis=1)[:, np.newaxis]
-    tn, fp, fn, tp = unravel_confusion_matrix(gtruth, predictions)
-    metrics['ber'] = ber(tn, fp, fn, tp)
-    if beta:
-        metrics['precision'], metrics['recall'] = precision_recall(gtruth, predictions, manual=True)
-        metrics['fbeta'] = fbeta(metrics['precision'], metrics['recall'], beta)
-    if verbose:
-        print('\nModel Evaluation Results')
-        print('{:40}'.format('-'*40))
-        print('ACC:{:4.2f}'.format(metrics['acc']))
-        print('BER:{:4.2f}'.format(metrics['ber']))
-        print('POSITIVE LABELS:{:5.2f}'.format(tp/(tp+fn)))
-        print('POSITIVE PREDICTIONS:{:5.2f}'.format(tp/(tp+fp)))
-        print("CONFUSION MATRIX:")
-        print(metrics['cm'])
+    score = score_predictions(pd.DataFrame(predictions), pd.Series(gtruth))
+    metrics['ndcg'] = np.mean(score)
+
     return metrics
 
 def plot_feature_importances(importances, feature_decoder, top_k=10):
@@ -136,5 +128,58 @@ def plot_feature_importances(importances, feature_decoder, top_k=10):
     plt.savefig('figs_feature_importance.png', bbox_inches = "tight")
     plt.show()
 
+def top_k_predictions(pred,k):
+    return [np.argsort(pred[i])[::-1][:k].tolist() for i in range(len(pred))]
+
+def dcg_at_k(r, k, method=1):
+    r = np.asfarray(r)[:k]
+    if r.size:
+        if method == 0:
+            return r[0] + np.sum(r[1:] / np.log2(np.arange(2, r.size + 1)))
+        elif method == 1:
+            return np.sum(r / np.log2(np.arange(2, r.size + 2)))
+        else:
+            raise ValueError('method must be 0 or 1.')
+    return 0.
+
+
+def ndcg_at_k(r, k=5, method=1):
+    dcg_max = dcg_at_k(sorted(r, reverse=True), k, method)
+    if not dcg_max:
+        return 0.
+    return dcg_at_k(r, k, method) / dcg_max
+
+
+def score_predictions(preds, truth, n_modes=5):
+    """
+    preds: pd.DataFrame
+      one row for each observation, one column for each prediction.
+      Columns are sorted from left to right descending in order of likelihood.
+    truth: pd.Series
+      one row for each obeservation.
+    """
+    assert(len(preds)==len(truth))
+    r = pd.DataFrame(0, index=preds.index, columns=preds.columns, dtype=np.float64)
+    for col in preds.columns:
+        r[col] = (preds[col] == truth) * 1.0
+
+    score = pd.Series(r.apply(ndcg_at_k, axis=1, reduce=True), name='score')
+    return score
+
 if __name__ == '__main__':
-    main()
+    # main()
+    # load the model from disk
+    filename = '../finalized_model.sav'
+    loaded_model = pickle.load(open(filename, 'rb'))
+
+    class AirBnB(): pass
+    airbnb = AirBnB()
+    airbnb.X = read_in_dataset(CSV_FNAMES['val-{}'.format(DATASET_TYPE)],
+                               keep_id=False, verbose=True)
+    airbnb.y = airbnb.X.pop('country_destination')
+
+    prob = loaded_model.predict_proba(airbnb.X)
+    airbnb.y_pred = top_k_predictions(prob, k=5)
+    score = score_predictions(pd.DataFrame(airbnb.y_pred), pd.Series(airbnb.y))
+    final_score = np.mean(score)
+

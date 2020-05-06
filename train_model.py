@@ -29,7 +29,8 @@ from xgboost.sklearn import XGBClassifier
 
 # Project level imports
 from data.d_utils import read_in_dataset, experiment_features
-from model.eval_model import evaluate_model, plot_feature_importances
+from model.eval_model import evaluate_model, plot_feature_importances, \
+    top_k_predictions, score_predictions
 
 # Module level constants
 DATA_DIR = './airbnb-recruiting-new-user-bookings'
@@ -113,16 +114,19 @@ if XGB_MODEL:
     model = XGBClassifier(max_depth=6, learning_rate=0.3, n_estimators=25, class_weight=class_weight,
                         objective='multi:softprob', subsample=0.5, colsample_bytree=0.5, seed=SEED, verbosity=2)
     model.fit(airbnb.X_train,airbnb.y_train)
-    airbnb.y_pred_train = model.predict(airbnb.X_train)
-    airbnb.y_pred_val = model.predict(airbnb.X_val)
-    airbnb.y_pred_test = model.predict_proba(airbnb.X_test)
+
 else:
     # === Logistic Regression ===#
     model = LogisticRegression(solver='lbfgs', multi_class='auto', verbose=1)
     model.fit(airbnb.X_train, airbnb.y_train)
-    airbnb.y_pred_train = model.predict(airbnb.X_train)
-    airbnb.y_pred_val = model.predict(airbnb.X_val)
-    airbnb.y_pred_test = model.predict_proba(airbnb.X_test)
+
+def predict(model, X):
+    prob = model.predict_proba(X)
+    return top_k_predictions(prob, k=5)
+
+airbnb.y_prob_train = predict(model, airbnb.X_train)
+airbnb.y_prob_val = predict(model, airbnb.X_val)
+airbnb.y_prob_test = predict(model, airbnb.X_test)
 
 # Evaluate classifiers
 print('Training set')
