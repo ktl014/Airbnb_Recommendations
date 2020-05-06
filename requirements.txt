@@ -1,4 +1,6 @@
 pandas
 scikit-learn
-xgboost
+xgboost==0.90
 tqdm
+matplotlib
+numpy
