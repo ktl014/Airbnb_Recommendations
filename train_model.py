@@ -29,8 +29,8 @@ from xgboost.sklearn import XGBClassifier
 
 # Project level imports
 from data.d_utils import read_in_dataset, experiment_features
-from model.eval_model import evaluate_model, plot_feature_importances, \
-    top_k_predictions, score_predictions
+from eval_model import evaluate_model, plot_feature_importances, \
+    top_k_predictions, predict
 
 # Module level constants
 DATA_DIR = './airbnb-recruiting-new-user-bookings'
@@ -48,7 +48,7 @@ CSV_FNAMES = {
 DATASET_TYPE = 'merged_sessions'
 
 # Model Default
-XGB_MODEL = True
+XGB_MODEL = False
 SAVE = False
 
 # EXPERIMENTAL_FEATURES
@@ -120,13 +120,10 @@ else:
     model = LogisticRegression(solver='lbfgs', multi_class='auto', verbose=1)
     model.fit(airbnb.X_train, airbnb.y_train)
 
-def predict(model, X):
-    prob = model.predict_proba(X)
-    return top_k_predictions(prob, k=5)
 
-airbnb.y_prob_train = predict(model, airbnb.X_train)
-airbnb.y_prob_val = predict(model, airbnb.X_val)
-airbnb.y_prob_test = predict(model, airbnb.X_test)
+airbnb.y_pred_train = predict(model, airbnb.X_train)
+airbnb.y_pred_val = predict(model, airbnb.X_val)
+airbnb.y_pred_test = model.predict_proba(airbnb.X_test)
 
 # Evaluate classifiers
 print('Training set')
@@ -137,13 +134,16 @@ print(evaluate_model(airbnb.y_val, airbnb.y_pred_val))
 print()
 
 # Plot the feature importance for parameter insights
-plot_feature_importances(model.feature_importances_, airbnb.idx2feature)
+if XGB_MODEL:
+    plot_feature_importances(model.feature_importances_, airbnb.idx2feature)
 
 # Save model
 if SAVE:
     # save the model to disk
-    filename = 'finalized_model.sav'
+    model_type = 'XGB' if XGB_MODEL else 'LR'
+    filename = f'finalized_{model_type}model.sav'
     pickle.dump(model, open(filename, 'wb'))
+    print(f'Saved model as {filename}')
 
 # Write test predictions to submission file
 #Taking the 5 classes with highest probabilities

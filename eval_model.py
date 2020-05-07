@@ -20,10 +20,7 @@ from data.d_utils import read_in_dataset
 
 # Module level constants
 DATA_DIR = '../airbnb-recruiting-new-user-bookings'
-# Select dataset type
-# DATASET_TYPE = 'processed'
-# DATASET_TYPE = 'feat_eng'
-DATASET_TYPE = 'part-merged_sessions'
+
 CSV_FNAMES = {
     'train-processed': os.path.join(DATA_DIR, 'train_users_2-processed.csv'),
     'test-processed': os.path.join(DATA_DIR, 'test_users-processed.csv'),
@@ -35,18 +32,37 @@ CSV_FNAMES = {
     'val-part-merged_sessions': os.path.join(DATA_DIR, 'val_users-part-merged_sessions.csv')
 }
 
+VALIDATE_MODEL = True
+
 def main():
     # load the model from disk
     filename = '../finalized_model.sav'
     loaded_model = pickle.load(open(filename, 'rb'))
 
     # Set up dataset
+    # DATASET_TYPE = 'processed'
+    # DATASET_TYPE = 'feat_eng'
+    DATASET_TYPE = 'merged_sessions'
     class AirBnB(): pass
     airbnb = AirBnB()
+
     airbnb.X_test = read_in_dataset(CSV_FNAMES['test-{}'.format(DATASET_TYPE)],
                                     keep_id=True, verbose=True)
     airbnb.test_id = airbnb.X_test.pop('id')
     airbnb.X_test.pop('country_destination')
+
+    if VALIDATE_MODEL:
+        # Load dataset
+        DATASET_TYPE = 'part-merged_sessions'
+        airbnb.X = read_in_dataset(CSV_FNAMES['val-{}'.format(DATASET_TYPE)],
+                                   keep_id=False, verbose=True)
+        airbnb.y = airbnb.X.pop('country_destination')
+
+        prob = loaded_model.predict_proba(airbnb.X)
+        airbnb.y_pred = top_k_predictions(prob, k=5)
+        score = score_predictions(pd.DataFrame(airbnb.y_pred), pd.Series(airbnb.y))
+        final_score = np.mean(score)
+        print(final_score)
 
     # Run model on test set
     airbnb.y_pred_test = loaded_model.predict_proba(airbnb.X_test)
@@ -102,14 +118,6 @@ def precision_recall(gtruth, predictions, manual=False):
         precision, recall, _, _ = precision_recall_fscore_support(gtruth, predictions)
     return precision, recall
 
-def evaluate_model(gtruth, predictions, verbose=True, normalize=True, beta=0):
-    """Compute all relevant evaluation metrics for a given model"""
-    metrics = {}
-    score = score_predictions(pd.DataFrame(predictions), pd.Series(gtruth))
-    metrics['ndcg'] = np.mean(score)
-
-    return metrics
-
 def plot_feature_importances(importances, feature_decoder, top_k=10):
     """Plot feature importances for XGB/Random Forest model"""
     import matplotlib.pyplot as plt
@@ -127,6 +135,14 @@ def plot_feature_importances(importances, feature_decoder, top_k=10):
     plt.tight_layout()
     plt.savefig('figs_feature_importance.png', bbox_inches = "tight")
     plt.show()
+
+def evaluate_model(gtruth, predictions, verbose=True, normalize=True, beta=0):
+    """Compute all relevant evaluation metrics for a given model"""
+    metrics = {}
+    score = score_predictions(pd.DataFrame(predictions), pd.Series(gtruth))
+    metrics['ndcg'] = np.mean(score)
+
+    return metrics
 
 def top_k_predictions(pred,k):
     return [np.argsort(pred[i])[::-1][:k].tolist() for i in range(len(pred))]
@@ -163,23 +179,14 @@ def score_predictions(preds, truth, n_modes=5):
     for col in preds.columns:
         r[col] = (preds[col] == truth) * 1.0
 
-    score = pd.Series(r.apply(ndcg_at_k, axis=1, reduce=True), name='score')
+    score = np.array(r.apply(ndcg_at_k, axis=1, result_type='reduce'))
     return score
 
+def predict(model, X):
+    prob = model.predict_proba(X)
+    return top_k_predictions(prob, k=5)
+
+
 if __name__ == '__main__':
-    # main()
-    # load the model from disk
-    filename = '../finalized_model.sav'
-    loaded_model = pickle.load(open(filename, 'rb'))
-
-    class AirBnB(): pass
-    airbnb = AirBnB()
-    airbnb.X = read_in_dataset(CSV_FNAMES['val-{}'.format(DATASET_TYPE)],
-                               keep_id=False, verbose=True)
-    airbnb.y = airbnb.X.pop('country_destination')
-
-    prob = loaded_model.predict_proba(airbnb.X)
-    airbnb.y_pred = top_k_predictions(prob, k=5)
-    score = score_predictions(pd.DataFrame(airbnb.y_pred), pd.Series(airbnb.y))
-    final_score = np.mean(score)
+    main()
 
