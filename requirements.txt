@@ -4,3 +4,4 @@ xgboost==0.90
 tqdm
 matplotlib
 numpy
+pytest==5.4.1
