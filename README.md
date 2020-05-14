@@ -13,14 +13,16 @@ the Airbnb dataset.
 ### System Requirements
 1. Python 3.7 or higher
 2. Python libraries: pandas, scikit-learn, matplotlib, numpy, tqdm
-3. Example: Create a python environment called `airbnb_env` and install required libraries using pip:
-- `virtualenv airbnb_env`
-- `source airbnb_env/bin/activate`
-- `pip install --user -r requirements.txt`
+3. Example: Create a python environment called `airbnb_env` and install required
+ libraries using conda:
+- `conda create -y -n airbnb_env`
+- `conda activate airbnb_env`
+- `conda install --yes --file requirements.txt`
 
 ### Download required files
 Download the [dataset](https://www.kaggle.com/c/airbnb-recruiting-new-user-bookings/data) and store it within the project dir as `airbnb-recruiting-new-user-bookings`.
-Next create the dataseet. Here we will create our engineered features and process the dataset.
+Next create the dataset. Here we will create our engineered features and process
+ the dataset.
 ```bash
 cd data
 python make_dataset.py
