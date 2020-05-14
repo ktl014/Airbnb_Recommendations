@@ -5,3 +5,8 @@ tqdm
 matplotlib
 numpy
 pytest==5.4.1
+tox
+coverage
+sphinx
+flake8
+watchdog

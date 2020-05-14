@@ -10,13 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 # Third party imports
 import pandas as pd
 import numpy as np
-from sklearn.metrics import confusion_matrix, classification_report, precision_recall_fscore_support
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import LabelBinarizer
-from sklearn.metrics import make_scorer
+from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 
 # Project level imports
-from data.d_utils import read_in_dataset
+from src.data.d_utils import read_in_dataset
 
 # Module level constants
 DATA_DIR = '../airbnb-recruiting-new-user-bookings'
