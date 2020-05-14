@@ -17,7 +17,7 @@ class TestDefaultRecommender:
 
     @pytest.fixture(scope='session')
     def model(self):
-        filename = './finalized_LRmodel.sav'
+        filename = './models/finalized_LRmodel.sav'
         loaded_model = pickle.load(open(filename, 'rb'))
         return loaded_model
 
