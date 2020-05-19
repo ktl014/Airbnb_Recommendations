@@ -37,7 +37,7 @@ else:
     st.write('click the button to generate user ID')
 
 st.header('Raw Data')
-check_data = st.checkbox('Show dataframe')
+check_data = st.checkbox('Show Dataframe')
 if check_data:
     show_data = data[data.index == 1][['id', 'gender', 'age', 'country_destination']]
     st.dataframe(show_data)
