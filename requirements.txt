@@ -11,3 +11,4 @@ sphinx
 flake8
 watchdog
 streamlit
+mock
