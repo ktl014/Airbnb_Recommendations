@@ -6,8 +6,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 import pytest
 import pandas as pd
+from sklearn.linear_model import LogisticRegression
 
-from src.eval_model import predict, score_predictions, evaluate_model
+from src.eval_model import predict, score_predictions, evaluate_model, load_model
+
+filename = './models/finalized_LRmodel.sav'
 
 class TestDefaultRecommender:
     @pytest.fixture(scope='session')
@@ -17,9 +20,7 @@ class TestDefaultRecommender:
 
     @pytest.fixture(scope='session')
     def model(self):
-        filename = './models/finalized_LRmodel.sav'
-        loaded_model = pickle.load(open(filename, 'rb'))
-        return loaded_model
+        return load_model(filename)
 
     @pytest.fixture(scope='session')
     def predictions(self):
@@ -28,6 +29,10 @@ class TestDefaultRecommender:
     @pytest.fixture(scope='session')
     def gtruth(self):
         return [3, 7, 7]
+
+    def test_load_model(self):
+        model = load_model(filename)
+        assert isinstance(model, LogisticRegression)
 
     def test_model_inference(self, test_data, model, predictions):
         assert predictions == predict(model, test_data)

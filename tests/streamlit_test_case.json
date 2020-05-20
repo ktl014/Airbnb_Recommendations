@@ -1,0 +1,78 @@
+{
+    "features": [
+        {
+            "affiliate_channel": "direct",
+            "affiliate_provider": "direct",
+            "age": 30.0,
+            "country_destination": "NDF",
+            "date_account_created": "2013-10-23",
+            "date_first_booking": NaN,
+            "first_affiliate_tracked": "untracked",
+            "first_browser": "Safari",
+            "first_device_type": "Mac Desktop",
+            "gender": "MALE",
+            "id": "0nb7ohdmvk",
+            "language": "en",
+            "signup_app": "Web",
+            "signup_flow": 0,
+            "signup_method": "facebook",
+            "timestamp_first_active": 20131023071324
+        },
+        {
+            "affiliate_channel": "direct",
+            "affiliate_provider": "direct",
+            "age": NaN,
+            "country_destination": "NDF",
+            "date_account_created": "2013-11-16",
+            "date_first_booking": NaN,
+            "first_affiliate_tracked": "untracked",
+            "first_browser": "Safari",
+            "first_device_type": "Mac Desktop",
+            "gender": "-unknown-",
+            "id": "rx82tiu9oy",
+            "language": "en",
+            "signup_app": "iOS",
+            "signup_flow": 25,
+            "signup_method": "basic",
+            "timestamp_first_active": 20131116033514
+        }
+    ],
+    "raw": [
+        {
+            "affiliate_channel": "direct",
+            "affiliate_provider": "direct",
+            "age": 30.0,
+            "country_destination": "NDF",
+            "date_account_created": "2013-10-23",
+            "date_first_booking": NaN,
+            "first_affiliate_tracked": "untracked",
+            "first_browser": "Safari",
+            "first_device_type": "Mac Desktop",
+            "gender": "MALE",
+            "id": "0nb7ohdmvk",
+            "language": "en",
+            "signup_app": "Web",
+            "signup_flow": 0,
+            "signup_method": "facebook",
+            "timestamp_first_active": 20131023071324
+        },
+        {
+            "affiliate_channel": "direct",
+            "affiliate_provider": "direct",
+            "age": NaN,
+            "country_destination": "NDF",
+            "date_account_created": "2013-11-16",
+            "date_first_booking": NaN,
+            "first_affiliate_tracked": "untracked",
+            "first_browser": "Safari",
+            "first_device_type": "Mac Desktop",
+            "gender": "-unknown-",
+            "id": "rx82tiu9oy",
+            "language": "en",
+            "signup_app": "iOS",
+            "signup_flow": 25,
+            "signup_method": "basic",
+            "timestamp_first_active": 20131116033514
+        }
+    ]
+}

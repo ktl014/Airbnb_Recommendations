@@ -6,20 +6,17 @@ Created on Tue May 12 23:50:37 2020
 """
 from collections import namedtuple
 import os
-import pickle
 import random
 import sys
 from pathlib import Path
-# PROJECT_DIR = Path(__file__).resolve()
-# print(str(PROJECT_DIR.parents[1]))
-# sys.path.insert(0, PROJECT_DIR.parents[1])
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import streamlit as st
 from sklearn.preprocessing import LabelEncoder
 
-from data.d_utils import read_in_dataset
-from eval_model import predict, evaluate_model
-import SessionState
+from src.data.d_utils import read_in_dataset
+from src.eval_model import predict, load_model
+from src.SessionState import *
 
 MODEL = './models/finalized_LRmodel.sav'
 
@@ -46,10 +43,6 @@ def load_data(features=False):
     Airbnb = namedtuple('Airbnb', list(DATASETS.keys()))
     return Airbnb(**DATASETS)
 
-@st.cache
-def load_model(fname):
-    return pickle.load(open(fname, 'rb'))
-
 def sample_data(data, id=None, test_ids=None):
     if test_ids:
         id = random.choice(test_ids)
@@ -68,6 +61,7 @@ def run():
 
     # Load dataset
     dataset = load_data(features=True)
+    #TODO select new set of test ids that show variability in the predictions
     test_ids = open(CSV_FNAMES['test_ids'], 'r').read().splitlines()
 
     # Get user id
