@@ -1,4 +1,7 @@
+from collections import namedtuple
 import os
+import random
+
 import pandas as pd
 from tqdm import tqdm
 
@@ -37,6 +40,30 @@ def read_in_dataset(csv_fname, raw=False, chunksize = 50000, keep_id=False, verb
         print('\n{0:*^80}\n'.format(' The first 5 rows look like this '))
         print(df.head())
     return df
+
+def load_data(CSV_FNAMES, features=False):
+    DATASETS = {}
+
+    DATASETS['users'] = read_in_dataset(CSV_FNAMES['val'], keep_id=True)
+
+    if features:
+        dataset_type = 'part-merged_sessions'
+        DATASETS['users_feat'] = read_in_dataset(CSV_FNAMES[f'val-{dataset_type}'],
+                                                 keep_id=True)
+
+    Airbnb = namedtuple('Airbnb', list(DATASETS.keys()))
+    return Airbnb(**DATASETS)
+
+def sample_data(data, id=None, test_ids=None):
+    if test_ids:
+        id = random.choice(test_ids)
+    sample = data[data['id'] == id].reset_index(drop=True)
+    return sample, id
+
+def preprocess_data(data):
+    label = data.pop('country_destination')
+    data = data.drop('id', axis=1)
+    return data, label
 
 
 def file_len(fname):

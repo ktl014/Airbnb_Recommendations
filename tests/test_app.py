@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -6,7 +7,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pandas as pd
 import pytest
 
-from src.app import sample_data, preprocess_data, load_data
+from src.data.d_utils import sample_data, preprocess_data, load_data
+
+DATA_DIR = './airbnb-recruiting-new-user-bookings'
+CSV_FNAMES = {
+    'val': os.path.join(DATA_DIR, 'val_users.csv'),
+    'val-part-merged_sessions': os.path.join(DATA_DIR, 'val_users-part-merged_sessions.csv'),
+    'test_ids': os.path.join(DATA_DIR, 'test_ids.txt'),
+    'age_bkt': os.path.join(DATA_DIR, 'age_gender_bkts.csv'),
+    'seasons': os.path.join(DATA_DIR, 'popular_seasons.csv')
+}
 
 class TestStreamLitApp:
     @pytest.fixture(scope='session')
@@ -22,10 +32,10 @@ class TestStreamLitApp:
         return data
 
     def test_load_data(self):
-        datasets = load_data()
+        datasets = load_data(CSV_FNAMES)
         assert hasattr(datasets, 'users')
         assert isinstance(datasets.users, pd.DataFrame)
-        datasets = load_data(features=True)
+        datasets = load_data(CSV_FNAMES, features=True)
         assert hasattr(datasets, 'users_feat')
         assert isinstance(datasets.users_feat, pd.DataFrame)
 
