@@ -56,6 +56,12 @@ class RecommendCountry():
         Expect cosmopolitan megacities, quaint traditional villages and everything 
         in between. That’s not to mention this nation’s jaw-dropping natural beauty."""
 
+        self.captions['DE'] = """
+        One of the most beautiful countries in the world, Denmark is a small, 
+        compact, and a very convenient country to visit. This amazing Nordic country 
+        is known for its sturdy engineering, architecture, food, fashion, 
+        art galleries & museums, castles & palaces, and truly world class cities"""
+
         #TODO give better captions for NDF and other
         self.captions['NDF'] = """
         Couldnt find you a country

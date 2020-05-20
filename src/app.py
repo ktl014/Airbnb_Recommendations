@@ -19,10 +19,9 @@ from src.eval_model import predict, load_model, evaluate_model
 from src.visualization.recommended_countries_viz import RecommendCountry
 from src import SessionState
 
+# Module Level Constants
 MODEL = './models/finalized_LRmodel.sav'
-
 DATA_DIR = './airbnb-recruiting-new-user-bookings'
-
 CSV_FNAMES = {
     'val': os.path.join(DATA_DIR, 'val_users.csv'),
     'val-part-merged_sessions': os.path.join(DATA_DIR, 'val_users-part-merged_sessions.csv'),
@@ -37,6 +36,17 @@ def load_data_frontend(CSV_FNAMES):
     return load_data(CSV_FNAMES, features=True)
 
 def display_predictions(predictions):
+    """ Display predictions after model inference
+
+    Predictions are listed as checkboxes where users can select them to see helpful
+    information about when to visit.
+
+    Args:
+        predictions (list): Predictions ['US', 'NDF', ...]
+
+    Returns:
+
+    """
     country_info = RecommendCountry(seasons_csv=CSV_FNAMES['seasons'])
     country_info.set_country_popular_age(csv_fname=CSV_FNAMES['age_bkt'])
 
@@ -57,14 +67,28 @@ def display_predictions(predictions):
             st.write('[Popular Season] {} | {}'.format(season.upper(), months))
 
 def run():
-    data, predictions, id, ndcg = None, [] ,0, {'ncdg':0}
-    session_state = SessionState.get(id=id, data=data, predictions=predictions)
+    """ Runs streamlit application
+
+    Workflow is to load the dataset in the background, then the following:
+    1. Generate user id
+    2. View data
+    3. Run predictions
+    4. View predictions
+
+    Returns:
+
+    """
+    data, predictions, id = None, [] ,0
+    ndcg = 0
+    session_state = SessionState.get(id=id, data=data, predictions=predictions,
+                                     ndcg=ndcg)
 
     # Load dataset
     dataset = load_data_frontend(CSV_FNAMES)
     #TODO select new set of test ids that show variability in the predictions
     test_ids = open(CSV_FNAMES['test_ids'], 'r').read().splitlines()
 
+    #=== Generate USER ID button ===#
     # Get user id
     st.header('Generate User')
     if st.button('Click here to Generate User ID'):
@@ -72,6 +96,7 @@ def run():
         session_state.X, session_state.id = sample_data(dataset.users, test_ids=test_ids)
         st.write(session_state.id)
 
+    #=== View raw data ===#
     st.subheader('Raw Data')
     if st.checkbox('Show data') and session_state.id:
         FEAT_TO_DISPLAY = ['id', 'country_destination',
@@ -80,9 +105,11 @@ def run():
         show_data = session_state.X[FEAT_TO_DISPLAY]
         st.dataframe(show_data)
 
+    #=== Recommendation button ===#
     # Recommend based off id
     st.header('Recomended Countries')
-    if st.button('Click here to Recommend Countries'):
+    recommend = st.button('Click here to Recommend Countries')
+    if recommend:
         le = LabelEncoder().fit(dataset.users['country_destination'])
 
         d, session_state.id = sample_data(dataset.users_feat, id=session_state.id)
@@ -106,8 +133,11 @@ def run():
     else:
         st.write("Press the above button..")
 
+    #=== Display predictions ===#
     display_predictions(session_state.predictions)
 
+
+#=== Start Streamlit Application ===#
 st.title("Airbnb Recomendation System")
 st.markdown(
     """
