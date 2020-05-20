@@ -19,6 +19,7 @@ from src.data.d_utils import read_in_dataset
 DATA_DIR = '../airbnb-recruiting-new-user-bookings'
 
 CSV_FNAMES = {
+    'train': os.path.join(DATA_DIR, 'train_users_2.csv'),
     'train-processed': os.path.join(DATA_DIR, 'train_users_2-processed.csv'),
     'test-processed': os.path.join(DATA_DIR, 'test_users-processed.csv'),
     'train-feat_eng': os.path.join(DATA_DIR, 'train_users_2-feature_eng.csv'),
@@ -26,6 +27,7 @@ CSV_FNAMES = {
     'train-merged_sessions': os.path.join(DATA_DIR, 'train_users-merged_sessions.csv'),
     'test-merged_sessions': os.path.join(DATA_DIR, 'test_users-merged_sessions.csv'),
     'train-part-merged_sessions': os.path.join(DATA_DIR, 'train_users-part-merged_sessions.csv'),
+    'val': os.path.join(DATA_DIR, 'val_users.csv'),
     'val-part-merged_sessions': os.path.join(DATA_DIR, 'val_users-part-merged_sessions.csv')
 }
 
@@ -77,44 +79,10 @@ def main():
     sub = pd.DataFrame(np.column_stack((ids, cts)), columns=['id', 'country'])
     sub.to_csv('sub.csv', index=False)
 
+def load_model(fname):
+    return pickle.load(open(fname, 'rb'))
+
 """Evaluation Metric Functions"""
-def accuracy(gtruth, predictions):
-    return (gtruth == predictions).mean()
-
-def ber(tn, fp, fn, tp):
-    return 1.0 - 0.5 *(tp/(tp+fn) + tn / (tn+fp))
-
-def fbeta(precision, recall, beta):
-    return (1 + beta ** 2) * precision * recall / (beta**2 * precision + recall)
-
-def unravel_confusion_matrix(gtruth, predictions, manual=False):
-    if manual:
-        TP_ = np.logical_and(predictions, gtruth)
-        FP_ = np.logical_and(predictions, np.logical_not(gtruth))
-        TN_ = np.logical_and(np.logical_not(predictions), np.logical_not(gtruth))
-        FN_ = np.logical_and(np.logical_not(predictions), gtruth)
-
-        TP = sum(TP_)
-        FP = sum(FP_)
-        TN = sum(TN_)
-        FN = sum(FN_)
-    else:
-        TN, FP, FN, TP = confusion_matrix(gtruth, predictions).ravel()
-    return TN, FP, FN, TP
-
-def precision_recall(gtruth, predictions, manual=False):
-    if manual:
-        # precision / recall
-        retrieved = sum(predictions)
-        relevant = sum(gtruth)
-        intersection = sum([y and p for y, p in zip(gtruth, predictions)])
-
-        precision = intersection / retrieved
-        recall = intersection / relevant
-    else:
-        precision, recall, _, _ = precision_recall_fscore_support(gtruth, predictions)
-    return precision, recall
-
 def plot_feature_importances(importances, feature_decoder, top_k=10):
     """Plot feature importances for XGB/Random Forest model"""
     import matplotlib.pyplot as plt
@@ -184,6 +152,8 @@ def predict(model, X):
     return top_k_predictions(prob, k=5)
 
 
-if __name__ == '__main__':
-    main()
+def init():
+  if __name__ == "__main__":
+    sys.exit(main())
 
+init()

@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import numpy as np
+import mock
 import pytest
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -47,3 +48,11 @@ class TestDefaultRecommender:
     def test_evaluate_model(self, gtruth, predictions):
         metrics = {'ndcg': 0.8102255193577976}
         assert metrics == evaluate_model(gtruth, predictions)
+
+    def test_init(self):
+        from src import eval_model
+        with mock.patch.object(eval_model, "main", return_value=42):
+            with mock.patch.object(eval_model, "__name__", "__main__"):
+                with mock.patch.object(eval_model.sys, 'exit') as mock_exit:
+                    eval_model.init()
+                    assert mock_exit.call_args[0][0] == 42
