@@ -107,7 +107,7 @@ def evaluate_model(gtruth, predictions, verbose=True, normalize=True, beta=0):
     score = score_predictions(pd.DataFrame(predictions), pd.Series(gtruth))
     metrics['ndcg'] = np.mean(score)
 
-    return metrics
+    return metrics, score
 
 def top_k_predictions(pred,k):
     return [np.argsort(pred[i])[::-1][:k].tolist() for i in range(len(pred))]

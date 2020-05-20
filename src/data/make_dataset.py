@@ -21,9 +21,10 @@ import pandas as pd
 # Project level imports
 from src.data.d_utils import read_in_dataset
 from src.data.merge_baseline_sessions import mergeBaselineAndSessionFeatures
+from src.features.get_best_times_visit_country import get_seasons
 
 # Module level constants
-DATA_DIR = '../airbnb-recruiting-new-user-bookings'
+DATA_DIR = './airbnb-recruiting-new-user-bookings'
 CSV_FNAMES = {
     'test': os.path.join(DATA_DIR, 'test_users.csv'),
     'train': os.path.join(DATA_DIR, 'train_users_2.csv'),
@@ -199,13 +200,7 @@ class AirBnBDataset(BaselineDataset):
         # get seasons
         time_col = 'timestamp_first_active'
         datefmt = '%Y%m%d%H%M%S'
-        seasons = ['winter', 'winter', 'spring',
-                   'spring', 'spring', 'summer', 'summer',
-                   'summer', 'fall', 'fall', 'fall', 'winter']
-        month_to_season = dict(zip(range(1, 13), seasons))
-        if not np.issubdtype(df[time_col].dtype, np.datetime64):
-            df[time_col] = pd.to_datetime(df[time_col], format=datefmt)
-        df['tfa_seasons'] = df[time_col].dt.month.map(month_to_season)
+        df = get_seasons(df, time_col, datefmt=datefmt)
 
         ohe_features = ['tfa_seasons']
         df = self.one_hot_encode_features(df, ohe_features, drop_raw=True)

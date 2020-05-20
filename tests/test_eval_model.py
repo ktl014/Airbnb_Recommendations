@@ -47,7 +47,8 @@ class TestDefaultRecommender:
 
     def test_evaluate_model(self, gtruth, predictions):
         metrics = {'ndcg': 0.8102255193577976}
-        assert metrics == evaluate_model(gtruth, predictions)
+        tested_metrics, _ = evaluate_model(gtruth, predictions)
+        assert metrics == tested_metrics
 
     def test_init(self):
         from src import eval_model

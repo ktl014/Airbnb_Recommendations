@@ -4,6 +4,7 @@ Created on Tue May 12 23:50:37 2020
 
 @author: dguan
 """
+from datetime import datetime
 from collections import namedtuple
 import os
 import random
@@ -15,8 +16,9 @@ import streamlit as st
 from sklearn.preprocessing import LabelEncoder
 
 from src.data.d_utils import read_in_dataset
-from src.eval_model import predict, load_model
-from src.SessionState import *
+from src.eval_model import predict, load_model, evaluate_model
+from src.visualization.recommended_countries_viz import RecommendCountry
+from src import SessionState
 
 MODEL = './models/finalized_LRmodel.sav'
 
@@ -25,7 +27,9 @@ DATA_DIR = './airbnb-recruiting-new-user-bookings'
 CSV_FNAMES = {
     'val': os.path.join(DATA_DIR, 'val_users.csv'),
     'val-part-merged_sessions': os.path.join(DATA_DIR, 'val_users-part-merged_sessions.csv'),
-    'test_ids': os.path.join(DATA_DIR, 'test_ids.txt')
+    'test_ids': os.path.join(DATA_DIR, 'test_ids.txt'),
+    'age_bkt': os.path.join(DATA_DIR, 'age_gender_bkts.csv'),
+    'seasons': os.path.join(DATA_DIR, 'popular_seasons.csv')
 }
 
 # load dataset
@@ -54,10 +58,30 @@ def preprocess_data(data):
     data = data.drop('id', axis=1)
     return data, label
 
+def display_predictions(predictions):
+    country_info = RecommendCountry(seasons_csv=CSV_FNAMES['seasons'])
+    country_info.set_country_popular_age(csv_fname=CSV_FNAMES['age_bkt'])
+
+    for idx, pred in enumerate(predictions):
+        if st.checkbox(f'{idx + 1}. {pred}'):
+            # Get country image
+            st.image(country_info.get_country_image(pred), caption=pred.upper(),
+                     use_column_width=True)
+            # Write caption
+            st.write(country_info.get_image_caption(pred))
+
+            if pred == 'NDF' or pred == 'other':
+                continue
+
+            age = country_info.popular_age[pred]
+            season, months = country_info.get_popular_seasons(pred)
+            st.write('[Popular Age] Male: {} | Female: {}'.format(age['male'], age['female']))
+            st.write('[Popular Season] {} | {}'.format(season.upper(), months))
+
 def run():
 
     data, predictions, id = None, [] ,0
-    session_state = SessionState.get(id=id, data=data, prediction=predictions)
+    session_state = SessionState.get(id=id, data=data, predictions=predictions)
 
     # Load dataset
     dataset = load_data(features=True)
@@ -93,19 +117,25 @@ def run():
         # Make model inference
         # then postprocess the prediction
         predictions = predict(model, X)
-        predictions = le.inverse_transform(predictions[0])
-        st.write(predictions)
-        st.write(session_state.id)
+        session_state.predictions = le.inverse_transform(predictions[0])
+        ndcg, score = evaluate_model(y, predictions)
 
-        #TODO Display Model Predictions
+        st.write(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | USR ID: {session_state.id}] NDCG '
+                 f'Score: {ndcg["ndcg"]}')
+        st.write(f'Below are the predicted country recommendations for this users '
+                 f'first booking experience')
+
     else:
         st.write("Press the above button..")
 
-if __name__ == '__main__':
-    st.title("Airbnb Recomendation System")
-    st.markdown(
-        """
-            This is a demo of a Streamlit app that shows Airbnb recomendation for travellers. 
-            [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
-        """)
-    run()
+    display_predictions(session_state.predictions)
+
+# if __name__ == '__main__':
+st.title("Airbnb Recomendation System")
+st.markdown(
+    """
+        This is a demo of a Streamlit app that shows Airbnb recomendation for travellers.
+        [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
+    """)
+#     run()
+run()
