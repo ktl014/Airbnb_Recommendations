@@ -16,6 +16,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from src.data.d_utils import sample_data, preprocess_data, load_data
 from src.eval_model import predict, load_model, evaluate_model
+from src.recommend import run_recommmendation
 from src.visualization.recommended_countries_viz import RecommendCountry
 from src import SessionState
 
@@ -29,6 +30,7 @@ CSV_FNAMES = {
     'age_bkt': os.path.join(DATA_DIR, 'age_gender_bkts.csv'),
     'seasons': os.path.join(DATA_DIR, 'popular_seasons.csv')
 }
+LABELS = './src/data/labels.txt'
 
 # load dataset
 @st.cache
@@ -47,6 +49,8 @@ def display_predictions(predictions):
     Returns:
 
     """
+    #TODO test getting info from the predictions given the teest age bucket and test
+    # seasons
     country_info = RecommendCountry(seasons_csv=CSV_FNAMES['seasons'])
     country_info.set_country_popular_age(csv_fname=CSV_FNAMES['age_bkt'])
 
@@ -110,19 +114,8 @@ def run():
     st.header('Recomended Countries')
     recommend = st.button('Click here to Recommend Countries')
     if recommend:
-        le = LabelEncoder().fit(dataset.users['country_destination'])
-
-        d, session_state.id = sample_data(dataset.users_feat, id=session_state.id)
-        X, y = preprocess_data(d)
-
-        # Load model
-        model = load_model(MODEL)
-
-        # Make model inference
-        # then postprocess the prediction
-        predictions = predict(model, X)
-        session_state.predictions = le.inverse_transform(predictions[0])
-        ndcg, score = evaluate_model(y, predictions)
+        session_state.predictions, ndcg = run_recommmendation(dataset, session_state.id,
+                                                              model_weights=MODEL)
 
         # Report the predictions results
         st.write(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | USR ID: {session_state.id}] NDCG '

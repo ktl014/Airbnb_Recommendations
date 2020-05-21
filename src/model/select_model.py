@@ -38,15 +38,23 @@ CSV_FNAMES = {
     'test-merged_sessions': os.path.join(DATA_DIR, 'test_users-merged_sessions.csv')
 }
 
-def main():
-    # Read in training set and encode labels
-    start_timer = datetime.datetime.now()
+MODELS = [
+    DummyClassifier(strategy='most_frequent'),
+    LogisticRegression(solver='lbfgs', multi_class='auto'),
+    RandomForestClassifier(),
+    XGBClassifier(),
+    SVC(),
+    GaussianNB(),
+    KNeighborsClassifier(n_neighbors=2)
+]
 
+def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, models=MODELS):
+    # Read in training set and encode labels
     class AirBnB():
         pass
 
     airbnb = AirBnB()
-    airbnb.X = read_in_dataset(CSV_FNAMES['train-{}'.format(DATASET_TYPE)], verbose=True)
+    airbnb.X = read_in_dataset(csv_fnames['train-{}'.format(dataset_type)], verbose=True)
     airbnb.idx2feature = {idx: feature for idx, feature in enumerate(airbnb.X.columns)}
     airbnb.feature2idx = {feature: idx for idx, feature in enumerate(airbnb.X.columns)}
     airbnb.train_labels = airbnb.X.pop('country_destination')
@@ -63,21 +71,13 @@ def main():
                                                     test_size=PARTITION, shuffle=True,
                                                     random_state=SEED)
 
-    models = [
-        DummyClassifier(strategy='most_frequent'),
-        LogisticRegression(solver='lbfgs', multi_class='auto'),
-        RandomForestClassifier(),
-        XGBClassifier(),
-        SVC(),
-        GaussianNB(),
-        KNeighborsClassifier(n_neighbors=2)
-    ]
     feature_names = list(airbnb.X_train.columns)
     for model in models:
         try:
             training_cv_score_model(airbnb.X_train, airbnb.y_train, model, feature_names)
         except Exception as e:
             raise e
+    return 0
 
 def training_cv_score_model(X, y, model, feature_names, n_folds=10):
     """
@@ -113,6 +113,8 @@ def training_cv_score_model(X, y, model, feature_names, n_folds=10):
 
     print(f'{model_name}, Average Score : {mean_score} & Standard Deviation: {avg_score}')
     print('-'*90)
+
+    return (model_name, mean_score, avg_score)
 
 if __name__ == '__main__':
     main()

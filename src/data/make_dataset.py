@@ -24,7 +24,7 @@ from src.data.merge_baseline_sessions import mergeBaselineAndSessionFeatures
 from src.features.get_best_times_visit_country import get_seasons
 
 # Module level constants
-DATA_DIR = './airbnb-recruiting-new-user-bookings'
+DATA_DIR = '../../airbnb-recruiting-new-user-bookings'
 CSV_FNAMES = {
     'test': os.path.join(DATA_DIR, 'test_users.csv'),
     'train': os.path.join(DATA_DIR, 'train_users_2.csv'),
@@ -55,7 +55,7 @@ class BaselineDataset():
         self.data = self.process(data.copy(), drop_raw=drop_raw)
         print('Processed')
 
-    def process(self, data, drop_raw=True, verbose=True):
+    def process(self, data, drop_raw=True):
         """ Processes the dataset
 
         :param data (pd.DataFrame): Dataset to be processed
@@ -110,7 +110,7 @@ class BaselineDataset():
             "first_device_type",
             "first_browser",
         ]
-        df = self.one_hot_encode_features(df, ohe_feats, drop_raw)
+        df = self.one_hot_encode_features(df, ohe_feats, drop_raw=False)
 
         # drop all of the raw columns after processing them
         self.dropped_raw_features = ohe_feats + ['date_account_created', 'timestamp_first_active']
@@ -123,7 +123,7 @@ class BaselineDataset():
 
         :param data (pd.DataFrame): Dataset
         :param ohe_features (list): List of features to be one hot encoded
-        :param drop_raw (bool): Flag for dropping the raw features. Default set to True.
+        :param drop_raw (bool): Flag for dropping the raw features. Default set to False.
         :return:
             pd.DataFrame: One hot encoded features within a Dataframe
         """
@@ -171,7 +171,7 @@ class AirBnBDataset(BaselineDataset):
         """
         # Process the dataset if set to True
         if process_data:
-            data = self.process(data.copy())
+            data = self.process(data.copy(), drop_raw=False)
             print('SUCCESS: Processed')
 
         # Pass in any planned raw features from the Baseline Dataset
@@ -208,28 +208,34 @@ class AirBnBDataset(BaselineDataset):
         df = df.drop(self.dropped_raw_features, axis=1)
         return df
 
-if __name__ == '__main__':
-    do_baseline = False
-    do_merged_sessions = True
+def main(csv_fnames=CSV_FNAMES, do_baseline=False, do_merged_sessions=True):
+    """ Make feature engineered training and testing datasets
+
+    Args:
+        csv_fnames (dict): Dictionary of csv filenames
+        do_baseline (bool): Flag for generating the baseline dataset
+        do_merged_sessions (bool): Flag for generating the final dataset version
+
+    """
 
     # Merge our baseline and sessions dataset if set to true
     # the sessions data is lengthy in generation time, so it lives in its own script
     # aside from our dataset making script. This is to help combine them.
     if do_merged_sessions:
         PRE = 'feature_eng'
-        train_input = CSV_FNAMES['train-{}'.format(PRE)]
-        test_input = CSV_FNAMES['test-{}'.format(PRE)]
-        sessions_input = CSV_FNAMES['sessions-eng']
+        train_input = csv_fnames['train-{}'.format(PRE)]
+        test_input = csv_fnames['test-{}'.format(PRE)]
+        sessions_input = csv_fnames['sessions-eng']
         print('Merging training set')
-        mergeBaselineAndSessionFeatures(train_input, sessions_input, CSV_FNAMES['train-merged_sessions'])
+        mergeBaselineAndSessionFeatures(train_input, sessions_input, csv_fnames['train-merged_sessions'])
         print('Merging test set')
-        mergeBaselineAndSessionFeatures(test_input, sessions_input, CSV_FNAMES['test-merged_sessions'])
+        mergeBaselineAndSessionFeatures(test_input, sessions_input, csv_fnames['test-merged_sessions'])
 
     else:
         # Load up our datasets from the csv files
         PRE = 'processed'
-        df_train = read_in_dataset(CSV_FNAMES['train'])
-        df_test = read_in_dataset(CSV_FNAMES['test'])
+        df_train = read_in_dataset(csv_fnames['train'])
+        df_test = read_in_dataset(csv_fnames['test'])
         idx_train = df_train.shape[0]
         df = pd.concat((df_train, df_test), axis=0, ignore_index=True, sort=True)
 
@@ -247,8 +253,12 @@ if __name__ == '__main__':
         X_train, X_test = dataset.split(data=dataset.data, index_train=idx_train)
 
         #=== Save dataset ===#
-        output_fname = CSV_FNAMES['train'].split('.csv')[0] + '-{}.csv'.format(PRE)
+        output_fname = csv_fnames['train'].split('.csv')[0] + '-{}.csv'.format(PRE)
         X_train.to_csv(output_fname, index=False)
-        output_fname = CSV_FNAMES['test'].split('.csv')[0] + '-{}.csv'.format(PRE)
+        output_fname = csv_fnames['test'].split('.csv')[0] + '-{}.csv'.format(PRE)
         X_test.to_csv(output_fname, index=False)
         print('Complete')
+
+
+if __name__ == '__main__':
+    main(do_baseline=True, do_merged_sessions=False)

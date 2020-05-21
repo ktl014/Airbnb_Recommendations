@@ -1,4 +1,4 @@
-import pickle
+import os
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -9,14 +9,17 @@ import pytest
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 
-from src.eval_model import predict, score_predictions, evaluate_model, load_model
+import src.data.d_utils
+from src.eval_model import *
 
 filename = './models/finalized_LRmodel.sav'
+tst_file = './tests/LRmodel-v001_test_case.json'
 
 class TestDefaultRecommender:
+
     @pytest.fixture(scope='session')
     def test_data(self):
-        test_examples = pd.read_json('./tests/LRmodel-v001_test_case.json')
+        test_examples = pd.read_json(tst_file)
         return test_examples
 
     @pytest.fixture(scope='session')
@@ -49,6 +52,25 @@ class TestDefaultRecommender:
         metrics = {'ndcg': 0.8102255193577976}
         tested_metrics, _ = evaluate_model(gtruth, predictions)
         assert metrics == tested_metrics
+
+    def test_plot_feature_importances(self):
+        importances = np.array([0.4, 0.3, 0.8, 0.3, 0.2])
+        feature_decoder = {idx: f'feature{idx}' for idx in range(len(importances))}
+        plot_feature_importances(importances, feature_decoder, top_k=3, show=False)
+        expected_file = 'figs_feature_importance.png'
+        assert os.path.exists(expected_file)
+        if os.path.exists(expected_file):
+            os.remove(expected_file)
+
+    def test_main(self):
+        tst_file = './tests/test-test_users-tst.csv'
+        dataset_type = 'dummy'
+        csv_fnames = {f'test-{dataset_type}': tst_file}
+        main(csv_fnames, filename, dataset_type, validate_model=False)
+        expected_submission_csv = 'sub.csv'
+        assert os.path.exists(expected_submission_csv)
+        if os.path.exists(expected_submission_csv):
+            os.remove(expected_submission_csv)
 
     def test_init(self):
         from src import eval_model

@@ -65,25 +65,6 @@ def preprocess_data(data):
     data = data.drop('id', axis=1)
     return data, label
 
-
-def file_len(fname):
-    """Check file length of any file
-
-    Example:
-        n_rows = file_len(TRAIN_PATH)
-        print (f'Exact number of rows: {n_rows}')
-
-    :param fname:
-    :return:
-    """
-    import subprocess
-    p = subprocess.Popen(['wc', '-l', fname], stdout=subprocess.PIPE,
-                                              stderr=subprocess.PIPE)
-    result, err = p.communicate()
-    if p.returncode != 0:
-        raise IOError(err)
-    return int(result.strip().split()[0])+1
-
 class ExpFeatures():
     def __init__(self, features_list, stats=False, ratios=False, casted=False):
         self.st_ = ['n_actions_per_user', 'n_distinct_action_detail', 'n_distinct_action_types',
