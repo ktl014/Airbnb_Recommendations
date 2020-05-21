@@ -1,0 +1,3 @@
+id,date_account_created,timestamp_first_active,date_first_booking,gender,age,signup_method,signup_flow,language,affiliate_channel,affiliate_provider,first_affiliate_tracked,signup_app,first_device_type,first_browser,country_destination
+87mebub9p4,2010-09-14,20091208061105,2010-02-18,-unknown-,41.0,basic,0,en,direct,direct,untracked,Web,Mac Desktop,Chrome,US
+k6np330cm1,2010-01-05,20100105060859,2010-01-18,-unknown-,,basic,0,en,direct,direct,,Web,Other/Unknown,-unknown-,FR

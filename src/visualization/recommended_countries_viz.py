@@ -76,7 +76,6 @@ class RecommendCountry():
         df = pd.read_csv(csv_fname)
 
         grouping = 'country_destination'
-        genders = ['male', 'female']
 
         popular_age = defaultdict(dict)
         for cntry, cntry_df in df.groupby(grouping):

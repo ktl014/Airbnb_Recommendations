@@ -4,60 +4,34 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import pandas as pd
+import numpy as np
 import pytest
 
-from src.data.d_utils import sample_data, preprocess_data, load_data
+from src.data.d_utils import load_data
 from src.SessionState import *
+from src.recommend import run_recommmendation
 
-DATA_DIR = './airbnb-recruiting-new-user-bookings'
+DATA_DIR = './tests/test_streamlit_app_data'
 CSV_FNAMES = {
-    'val': os.path.join(DATA_DIR, 'val_users.csv'),
-    'val-part-merged_sessions': os.path.join(DATA_DIR, 'val_users-part-merged_sessions.csv'),
-    'test_ids': os.path.join(DATA_DIR, 'test_ids.txt'),
-    'age_bkt': os.path.join(DATA_DIR, 'age_gender_bkts.csv'),
-    'seasons': os.path.join(DATA_DIR, 'popular_seasons.csv')
+    'val': os.path.join(DATA_DIR, 'tst-streamlit_val_users.csv'),
+    'val-part-merged_sessions': os.path.join(DATA_DIR, 'tst-streamlit_val_users-part-merged_sessions.csv'),
+    'test_ids': os.path.join(DATA_DIR, 'tst-streamlit_test_ids.txt'),
+    'age_bkt': os.path.join(DATA_DIR, 'tst-streamlit_age_gender_bkts.csv'),
+    'seasons': os.path.join(DATA_DIR, 'tst-streamlit_popular_seasons.csv')
 }
+MODEL = './models/finalized_LRmodel.sav'
 
 class TestStreamLitApp:
     @pytest.fixture(scope='session')
-    def test_data(self):
-        with open('./tests/streamlit_test_case.json', 'r') as fp:
-            data_dict = json.load(fp)
+    def dataset(self):
+        return load_data(CSV_FNAMES, features=True)
 
-        # convert dictionaries into dataframes
-        data = {
-            key: pd.DataFrame(data_dict[key])
-            for key in data_dict
-        }
-        return data
-
-    def test_load_data(self):
-        datasets = load_data(CSV_FNAMES)
-        assert hasattr(datasets, 'users')
-        assert isinstance(datasets.users, pd.DataFrame)
-        datasets = load_data(CSV_FNAMES, features=True)
-        assert hasattr(datasets, 'users_feat')
-        assert isinstance(datasets.users_feat, pd.DataFrame)
-
-
-    def test_sample_data(self, test_data):
-        expected_id = input = '0nb7ohdmvk'
-        sample, id = sample_data(test_data['raw'], input)
-
-        assert id == expected_id
-        assert sample.shape == (1,16)
-
-        test_ids = ['rx82tiu9oy', '6i683pijvk']
-        sample, id = sample_data(test_data['raw'], test_ids=test_ids)
-        assert isinstance(sample, pd.DataFrame)
-        assert id in test_ids
-
-    def test_preprocess_data(self, test_data):
-        x, y = preprocess_data(test_data['features'])
-        assert 'country_destination' not in x.columns
-        assert 'id' not in x.columns
-        assert (y == pd.Series(['NDF', 'NDF'], name='country_destination')).all()
+    def test_recommend(self, dataset):
+        expected_predictions = np.array(['NDF', 'US', 'other', 'FR', 'IT'], dtype='<U5')
+        expected_ndcg = {'ndcg': 0.6309297535714575}
+        predictions, ndcg = run_recommmendation(dataset, '87mebub9p4', MODEL)
+        assert (expected_predictions == predictions).all()
+        assert expected_ndcg == ndcg
 
 class TestSessionState():
     def test_SessionState(self):

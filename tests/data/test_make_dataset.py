@@ -12,8 +12,8 @@ from src.data.make_dataset import *
 class TestMakeDataset():
     @pytest.fixture(scope='session')
     def csv_fnames(self):
-        return {'train': './tests/data/test-train_users_2.csv',
-                'test': './tests/data/test-test_users.csv'}
+        return {'train': './tests/data/train_usrs-make_dataset.csv',
+                'test': './tests/data/test_usrs-make_dataset.csv'}
 
     def test_Airbnb_init(self, csv_fnames):
         data = pd.read_csv(csv_fnames['train'])
