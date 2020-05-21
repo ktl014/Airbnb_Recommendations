@@ -1,0 +1,12 @@
+AU
+CA
+DE
+ES
+FR
+GB
+IT
+NDF
+NL
+PT
+US
+other

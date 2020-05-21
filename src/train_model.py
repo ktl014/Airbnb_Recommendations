@@ -35,12 +35,16 @@ from src.eval_model import evaluate_model, plot_feature_importances, \
 # Module level constants
 DATA_DIR = './airbnb-recruiting-new-user-bookings'
 CSV_FNAMES = {
+    'train': os.path.join(DATA_DIR, 'train_users_2.csv'),
     'train-processed': os.path.join(DATA_DIR, 'train_users_2-processed.csv'),
     'test-processed': os.path.join(DATA_DIR, 'test_users-processed.csv'),
     'train-feat_eng': os.path.join(DATA_DIR, 'train_users_2-feature_eng.csv'),
     'test-feat_eng': os.path.join(DATA_DIR, 'test_users-feature_eng.csv'),
     'train-merged_sessions': os.path.join(DATA_DIR, 'train_users-merged_sessions.csv'),
-    'test-merged_sessions': os.path.join(DATA_DIR, 'test_users-merged_sessions.csv')
+    'test-merged_sessions': os.path.join(DATA_DIR, 'test_users-merged_sessions.csv'),
+    'train-part-merged_sessions': os.path.join(DATA_DIR, 'train_users-part-merged_sessions.csv'),
+    'val': os.path.join(DATA_DIR, 'val_users.csv'),
+    'val-part-merged_sessions': os.path.join(DATA_DIR, 'val_users-part-merged_sessions.csv')
 }
 # Select dataset type
 # DATASET_TYPE = 'processed'
@@ -57,13 +61,14 @@ RATIOS_flag = True
 CASTED_flag = True
 
 #=== BEGIN: Airbnb Recommendation ===#
-def main():
+def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, xgb_model=XGB_MODEL, save=SAVE):
 
     # Read in training set and encode labels
     start_timer = datetime.datetime.now()
     class AirBnB(): pass
     airbnb = AirBnB()
-    airbnb.X = read_in_dataset(CSV_FNAMES['train-{}'.format(DATASET_TYPE)], verbose=True)
+    airbnb.X = read_in_dataset(csv_fnames['train-{}'.format(dataset_type)],
+                               verbose=True, keep_id=False)
     # Select here which experimeental features to run
     # default is the baseline
     airbnb.X = experiment_features(data=airbnb.X,
@@ -86,7 +91,7 @@ def main():
     airbnb.X_train, airbnb.X_val, \
     airbnb.y_train, airbnb.y_val = train_test_split(airbnb.X, airbnb.y, test_size=PARTITION, shuffle=True, random_state=SEED)
     # Read in test set
-    airbnb.X_test = read_in_dataset(CSV_FNAMES['test-{}'.format(DATASET_TYPE)], keep_id=True, verbose=True)
+    airbnb.X_test = read_in_dataset(csv_fnames['test-{}'.format(dataset_type)], keep_id=True, verbose=True)
     airbnb.X_test = experiment_features(data=airbnb.X_test,
                                         stats=STATS_flag,
                                         ratios=RATIOS_flag,
@@ -97,8 +102,8 @@ def main():
         airbnb.X_train.shape[0], airbnb.X_val.shape[0], airbnb.X_test.shape[0]))
 
     # Release memory usage
-    del airbnb.X
-    del airbnb.y
+    # del airbnb.X
+    # del airbnb.y
 
     # Compute class weights
     class_weight_list = compute_class_weight('balanced',
@@ -110,7 +115,7 @@ def main():
     # Begin training the model
     # flags are set to decide between which model to run
     print('Training classifier')
-    if XGB_MODEL:
+    if xgb_model:
         # === XGB Classifier (tuned) ===#
         model = XGBClassifier(max_depth=6, learning_rate=0.3, n_estimators=25, class_weight=class_weight,
                             objective='multi:softprob', subsample=0.5, colsample_bytree=0.5, seed=SEED, verbosity=2)
@@ -135,13 +140,13 @@ def main():
     print()
 
     # Plot the feature importance for parameter insights
-    if XGB_MODEL:
+    if xgb_model:
         plot_feature_importances(model.feature_importances_, airbnb.idx2feature)
 
     # Save model
-    if SAVE:
+    if save:
         # save the model to disk
-        model_type = 'XGB' if XGB_MODEL else 'LR'
+        model_type = 'XGB' if xgb_model else 'LR'
         filename = f'finalized_{model_type}model.sav'
         pickle.dump(model, open(filename, 'wb'))
         print(f'Saved model as {filename}')

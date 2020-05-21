@@ -1,0 +1,26 @@
+id,date_account_created,timestamp_first_active,date_first_booking,gender,age,signup_method,signup_flow,language,affiliate_channel,affiliate_provider,first_affiliate_tracked,signup_app,first_device_type,first_browser
+n4rr3dqajy,2014-08-22,20140822175757,,-unknown-,,basic,23,en,direct,direct,untracked,Android,Android Phone,-unknown-
+8htbyxtks6,2014-09-03,20140903152601,,-unknown-,,basic,25,en,direct,direct,untracked,iOS,Windows Desktop,Chrome
+9vp52kso71,2014-08-11,20140811211458,,-unknown-,26.0,basic,0,en,sem-brand,google,omg,Web,Mac Desktop,Chrome
+hzxougmerr,2014-08-29,20140829081954,,MALE,27.0,facebook,0,en,direct,direct,untracked,Web,Windows Desktop,Chrome
+xfejvnb192,2014-09-22,20140922050002,,-unknown-,18.0,basic,0,en,direct,direct,untracked,Web,Mac Desktop,Firefox
+00kbbr6qom,2014-07-31,20140731003317,,FEMALE,40.0,basic,0,en,direct,direct,linked,Moweb,iPhone,Mobile Safari
+mkdpm2kw1b,2014-09-01,20140901165133,,FEMALE,25.0,facebook,0,en,seo,facebook,untracked,Web,iPhone,Mobile Safari
+itrih22qky,2014-07-05,20140705222652,,-unknown-,,basic,25,en,direct,direct,untracked,iOS,iPhone,-unknown-
+k2scrp6mcg,2014-08-26,20140826210355,,FEMALE,28.0,facebook,0,en,direct,direct,linked,Web,Mac Desktop,Chrome
+i9u0rcke8k,2014-08-05,20140805174625,,-unknown-,,basic,25,en,direct,direct,untracked,iOS,iPhone,-unknown-
+bzsg8eubu1,2014-07-30,20140730040115,,FEMALE,36.0,basic,0,en,direct,direct,omg,Web,Mac Desktop,Safari
+epsy0nxwi5,2014-09-08,20140908060946,,MALE,25.0,facebook,0,en,seo,facebook,untracked,Web,iPhone,Mobile Safari
+rg5c1mkig9,2014-09-30,20140930223504,,MALE,31.0,facebook,25,en,direct,direct,untracked,iOS,iPhone,-unknown-
+9bd4lok4p7,2014-09-16,20140916013625,,-unknown-,,basic,23,en,direct,direct,untracked,Android,Android Phone,-unknown-
+n365dy99dt,2014-07-18,20140718065905,,MALE,53.0,facebook,0,en,direct,direct,untracked,Web,iPad,Mobile Safari
+boe7inxbiy,2014-09-28,20140928052025,,MALE,35.0,facebook,0,en,other,other,linked,Web,Mac Desktop,Chrome
+eazy4glgys,2014-08-10,20140810014304,,FEMALE,31.0,basic,23,en,direct,direct,untracked,Android,Android Phone,-unknown-
+9nr93bp0gd,2014-09-12,20140912215115,,-unknown-,29.0,basic,0,en,direct,direct,linked,Web,Mac Desktop,Firefox
+3nh4xyq5bs,2014-08-12,20140812092231,,MALE,27.0,facebook,25,en,direct,direct,untracked,iOS,iPhone,-unknown-
+bwzp1atmgl,2014-08-25,20140825191117,,-unknown-,,basic,0,en,direct,direct,untracked,Web,Windows Desktop,Chrome
+81ez0z1lr2,2014-07-17,20140717222338,,-unknown-,,basic,25,en,direct,direct,untracked,iOS,iPhone,-unknown-
+xwuwva3l70,2014-07-23,20140723140749,,MALE,49.0,facebook,25,en,direct,direct,untracked,iOS,iPhone,-unknown-
+o07864hxki,2014-09-05,20140905074636,,-unknown-,,basic,25,en,direct,direct,untracked,iOS,iPhone,-unknown-
+6lny5tj07r,2014-08-04,20140804180745,,-unknown-,,basic,0,en,seo,google,linked,Web,iPad,Mobile Safari
+ku8r1bzx7y,2014-07-02,20140702221338,,-unknown-,,basic,0,en,direct,direct,linked,Web,Windows Desktop,IE

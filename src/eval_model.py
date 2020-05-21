@@ -10,10 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 # Third party imports
 import pandas as pd
 import numpy as np
-from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
+from sklearn.preprocessing import LabelEncoder
 
 # Project level imports
-from src.data.d_utils import read_in_dataset
+from src.data.d_utils import read_in_dataset, experiment_features
 
 # Module level constants
 DATA_DIR = '../airbnb-recruiting-new-user-bookings'
@@ -32,39 +32,49 @@ CSV_FNAMES = {
 }
 
 VALIDATE_MODEL = True
+# DATASET_TYPE = 'processed'
+# DATASET_TYPE = 'feat_eng'
+DATASET_TYPE = 'merged_sessions'
+MODEL_WEIGHTS = '../models/finalized_LRmodel.sav'
+LABELS = './src/data/labels.txt'
 
-def main():
+def main(csv_fnames=CSV_FNAMES, model_weights=MODEL_WEIGHTS, dataset_type=DATASET_TYPE,
+         validate_model=VALIDATE_MODEL):
     # load the model from disk
-    filename = '../finalized_model.sav'
-    loaded_model = pickle.load(open(filename, 'rb'))
+    model = load_model(model_weights)
 
     # Set up dataset
-    # DATASET_TYPE = 'processed'
-    # DATASET_TYPE = 'feat_eng'
-    DATASET_TYPE = 'merged_sessions'
+
     class AirBnB(): pass
     airbnb = AirBnB()
 
-    airbnb.X_test = read_in_dataset(CSV_FNAMES['test-{}'.format(DATASET_TYPE)],
+    airbnb.X_test = read_in_dataset(csv_fnames['test-{}'.format(dataset_type)],
                                     keep_id=True, verbose=True)
+    airbnb.X_test = experiment_features(data=airbnb.X_test,
+                                        stats=True,
+                                        ratios=True,
+                                        casted=True, verbose=False)
     airbnb.test_id = airbnb.X_test.pop('id')
     airbnb.X_test.pop('country_destination')
 
-    if VALIDATE_MODEL:
+    airbnb.le = LabelEncoder()
+    airbnb.le.fit(open(LABELS).read().splitlines())
+
+    if validate_model:
         # Load dataset
-        DATASET_TYPE = 'part-merged_sessions'
-        airbnb.X = read_in_dataset(CSV_FNAMES['val-{}'.format(DATASET_TYPE)],
+        dataset_type = 'part-merged_sessions'
+        airbnb.X = read_in_dataset(csv_fnames['val-{}'.format(dataset_type)],
                                    keep_id=False, verbose=True)
         airbnb.y = airbnb.X.pop('country_destination')
 
-        prob = loaded_model.predict_proba(airbnb.X)
+        prob = model.predict_proba(airbnb.X)
         airbnb.y_pred = top_k_predictions(prob, k=5)
         score = score_predictions(pd.DataFrame(airbnb.y_pred), pd.Series(airbnb.y))
         final_score = np.mean(score)
         print(final_score)
 
     # Run model on test set
-    airbnb.y_pred_test = loaded_model.predict_proba(airbnb.X_test)
+    airbnb.y_pred_test = model.predict_proba(airbnb.X_test)
 
     # Write test predictions to submission file
     # Taking the 5 classes with highest probabilities
@@ -83,7 +93,7 @@ def load_model(fname):
     return pickle.load(open(fname, 'rb'))
 
 """Evaluation Metric Functions"""
-def plot_feature_importances(importances, feature_decoder, top_k=10):
+def plot_feature_importances(importances, feature_decoder, top_k=10, show=False):
     """Plot feature importances for XGB/Random Forest model"""
     import matplotlib.pyplot as plt
     import numpy as np
@@ -99,7 +109,8 @@ def plot_feature_importances(importances, feature_decoder, top_k=10):
     plt.title('Feature Importances')
     plt.tight_layout()
     plt.savefig('figs_feature_importance.png', bbox_inches = "tight")
-    plt.show()
+    if show:
+        plt.show()
 
 def evaluate_model(gtruth, predictions, verbose=True, normalize=True, beta=0):
     """Compute all relevant evaluation metrics for a given model"""
