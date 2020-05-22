@@ -9,7 +9,6 @@ import os
 import random
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import streamlit as st
 from sklearn.preprocessing import LabelEncoder
@@ -19,6 +18,11 @@ from src.eval_model import predict, load_model, evaluate_model
 from src.recommend import run_recommmendation
 from src.visualization.recommended_countries_viz import RecommendCountry
 from src import SessionState
+import pandas as pd
+import numpy as np
+import pydeck as pdk
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # Module Level Constants
 MODEL = './models/finalized_LRmodel.sav'
@@ -32,10 +36,12 @@ CSV_FNAMES = {
 }
 LABELS = './src/data/labels.txt'
 
+
 # load dataset
 @st.cache
 def load_data_frontend(CSV_FNAMES):
     return load_data(CSV_FNAMES, features=True)
+
 
 def display_predictions(predictions):
     """ Display predictions after model inference
@@ -49,7 +55,7 @@ def display_predictions(predictions):
     Returns:
 
     """
-    #TODO test getting info from the predictions given the teest age bucket and test
+    # TODO test getting info from the predictions given the teest age bucket and test
     # seasons
     country_info = RecommendCountry(seasons_csv=CSV_FNAMES['seasons'])
     country_info.set_country_popular_age(csv_fname=CSV_FNAMES['age_bkt'])
@@ -70,6 +76,7 @@ def display_predictions(predictions):
             st.write('[Popular Age] Male: {} | Female: {}'.format(age['male'], age['female']))
             st.write('[Popular Season] {} | {}'.format(season.upper(), months))
 
+
 def run():
     """ Runs streamlit application
 
@@ -82,25 +89,24 @@ def run():
     Returns:
 
     """
-    data, predictions, id = None, [] ,0
+    data, predictions, id = None, [], 0
     ndcg = 0
     session_state = SessionState.get(id=id, data=data, predictions=predictions,
                                      ndcg=ndcg)
 
     # Load dataset
     dataset = load_data_frontend(CSV_FNAMES)
-    #TODO select new set of test ids that show variability in the predictions
+    # TODO select new set of test ids that show variability in the predictions
     test_ids = open(CSV_FNAMES['test_ids'], 'r').read().splitlines()
 
-    #=== Generate USER ID button ===#
+    # === Generate USER ID button ===#
     # Get user id
     st.header('Generate User')
     if st.button('Click here to Generate User ID'):
-
         session_state.X, session_state.id = sample_data(dataset.users, test_ids=test_ids)
         st.write(session_state.id)
 
-    #=== View raw data ===#
+    # === View raw data ===#
     st.subheader('Raw Data')
     if st.checkbox('Show data') and session_state.id:
         FEAT_TO_DISPLAY = ['id', 'country_destination',
@@ -109,7 +115,7 @@ def run():
         show_data = session_state.X[FEAT_TO_DISPLAY]
         st.dataframe(show_data)
 
-    #=== Recommendation button ===#
+    # === Recommendation button ===#
     # Recommend based off id
     st.header('Recomended Countries')
     recommend = st.button('Click here to Recommend Countries')
@@ -126,11 +132,65 @@ def run():
     else:
         st.write("Press the above button..")
 
-    #=== Display predictions ===#
+    # === Display predictions ===#
     display_predictions(session_state.predictions)
 
+    # === Display location on world map ===#
+    display_map(session_state.predictions)
 
-#=== Start Streamlit Application ===#
+
+def display_map(predictions):
+    """
+    display the predicted countries on the map
+
+    input: predictions
+
+    return:
+
+    """
+
+    # obtain recommended countries 'pred'
+    recommend_countries = []
+    for idx, pred in enumerate(predictions):
+        # obtain the recommended countries
+        recommend_countries.append(pred)
+
+    # data for all available countries
+    # 'US', 'FR', 'CA', 'GB', 'ES', 'IT', 'PT', 'NL', 'DE', 'AU', 'NDF'(no destination found), and 'other'.
+    data = pd.DataFrame({
+        'country_abb': ['US', 'FR', 'CA', 'GB', 'ES', 'IT', 'PT', 'NL', 'DE', 'AU'],
+        'country_name': ['USA', 'France', 'Canada', 'United Kingdom', 'Spain', 'Italy', 'Portugal', 'Netherlands',
+                         'Germany', 'Australia'],
+        'lat': [37.0902405, 47.0, 56.1303673, 55.3780518, 40.4636688, 43, 38.736946, 52.370216, 52.520008, -25.2743988],
+        'lon': [-95.7128906, 2.0, -106.3467712, -3, -3.7492199, 12, -9.142685, 4.895168, 13.404954, 133.7751312]
+    })
+
+    # get info of all recommended countries
+    recommend_countries_df = data.loc[data['country_abb'].isin(recommend_countries)]
+    # st.dataframe(recommend_countries_df)
+
+    midpoint = (np.average(data['lat']), np.average(data['lon']))
+
+    # plot the location of those recommended countries on world map
+    st.deck_gl_chart(
+        viewport={
+            # initial view
+            'latitude': midpoint[0],
+            'longitude': midpoint[1],
+            'zoom': 1
+        },
+        layers=[{
+            # scatter set up
+            'type': 'ScatterplotLayer',
+            'data': recommend_countries_df,
+            'radiusScale': 250,
+            'radiusMinPixels': 6,
+            'getFillColor': [248, 24, 148],
+        }]
+    )
+
+
+# === Start Streamlit Application ===#
 st.title("Airbnb Recomendation System")
 st.markdown(
     """
