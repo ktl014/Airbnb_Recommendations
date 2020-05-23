@@ -6,23 +6,19 @@ Created on Tue May 12 23:50:37 2020
 """
 from datetime import datetime
 import os
-import random
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import streamlit as st
-from sklearn.preprocessing import LabelEncoder
 
-from src.data.d_utils import sample_data, preprocess_data, load_data
-from src.eval_model import predict, load_model, evaluate_model
+from src.data.d_utils import sample_data, load_data
 from src.recommend import run_recommmendation
 from src.visualization.recommended_countries_viz import RecommendCountry
 from src import SessionState
 import pandas as pd
 import numpy as np
-import pydeck as pdk
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # Module Level Constants
 MODEL = './models/finalized_LRmodel.sav'
@@ -113,7 +109,8 @@ def run():
                            'date_account_created', 'gender', 'age',
                            'signup_method', 'signup_app', 'language']
         show_data = session_state.X[FEAT_TO_DISPLAY]
-        st.dataframe(show_data)
+        # st.dataframe(show_data)
+        st.json(show_data.to_json())
 
     # === Recommendation button ===#
     # Recommend based off id
