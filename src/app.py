@@ -8,6 +8,7 @@ from datetime import datetime
 import os
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import streamlit as st
@@ -18,7 +19,6 @@ from src.visualization.recommended_countries_viz import RecommendCountry
 from src import SessionState
 import pandas as pd
 import numpy as np
-
 
 # Module Level Constants
 MODEL = './models/finalized_LRmodel.sav'
@@ -109,8 +109,8 @@ def run():
                            'date_account_created', 'gender', 'age',
                            'signup_method', 'signup_app', 'language']
         show_data = session_state.X[FEAT_TO_DISPLAY]
-        # st.dataframe(show_data)
-        st.json(show_data.to_json())
+        st.dataframe(show_data)
+        # st.json(show_data.to_json())
 
     # === Recommendation button ===#
     # Recommend based off id
@@ -187,11 +187,16 @@ def display_map(predictions):
     )
 
 
-# === Start Streamlit Application ===#
-st.title("Airbnb Recomendation System")
-st.markdown(
-    """
-        This is a demo of a Streamlit app that shows Airbnb recomendation for travellers.
-        [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
-    """)
-run()
+def recommendation():
+    # === Start Streamlit Application ===#
+    st.title("Airbnb Recomendation System")
+    st.markdown(
+        """
+            This is a demo of a Streamlit app that shows Airbnb recomendation for travellers.
+            [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
+        """)
+    run()
+
+
+if __name__ == "__main__":
+    recommendation()
