@@ -4,11 +4,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import streamlit as st
-import altair as alt
-import pandas as pd
-from src.app import run
+from src.app import recommendation
 from src.visualization_app import visualization
-
 
 
 def main():
@@ -24,8 +21,7 @@ def main():
 
 
     elif page == "Recommendation System":
-        st.title("Recommendation System")
-        run()
+        recommendation()
 
     elif page == "Visualization":
         visualization()
