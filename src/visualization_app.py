@@ -4,9 +4,7 @@ Created on Tue May 12 23:50:37 2020
 
 @author: dguan
 """
-from datetime import datetime
-import os
-import random
+
 import sys
 from pathlib import Path
 
@@ -79,11 +77,115 @@ def plot_line_chart(c_x, cou):
         plt.yscale('log')
 
     plt.legend(tuple(cou))
-    plt.xlabel('Booking Date', fontsize=14)
-    plt.title('Travelling Rate', fontsize=20)
-    plt.ylabel('Total (log)', fontsize=14)
+    plt.xlabel('Booking Date', fontsize='xx-large')
+    plt.title('Travelling Rate', fontsize='xx-large')
+    plt.ylabel('Total (log)', fontsize='xx-large')
     plt.xticks(np.arange(1, 73, 6), ['Jan-10', 'July-10', 'Jan-11', 'July-11', 'Jan-12', 'July-12',
                                      'Jan-13', 'July-13', 'Jan-14', 'July-14', 'Jan-15'])
+    st.pyplot()
+
+
+def plot_age(user_date, cou):
+    # cou=['US','Other','FR','CA','GB','ES','IT','DE','NL','AU','PT']
+    # cou = ['AU', 'US']
+
+    a_x = user_date[user_date['Country Destination'].isin(cou)]
+    conditions = [
+        (a_x['Age'] >= 18) & (a_x['Age'] <= 30),
+        (a_x['Age'] >= 31) & (a_x['Age'] <= 40),
+        (a_x['Age'] >= 41) & (a_x['Age'] <= 50),
+        (a_x['Age'] >= 51) & (a_x['Age'] <= 60),
+        (a_x['Age'] >= 61)]
+    choices = ['18-30', '31-40', '41-50', '51-60', '60+']
+    a_x['age'] = np.select(conditions, choices)
+    a_x = a_x.groupby(['age', 'Gender']).agg('count').reset_index()
+    a_x = a_x[['age', 'Gender', 'id']]
+    a_x
+    plt.figure(figsize=(10, 7))
+    c = 0
+    t = []
+    for i in a_x['Gender'].unique():
+        t.append([])
+        for j in a_x['age'].unique():
+            try:
+                temp = a_x[(a_x['age'] == j) & (a_x['Gender'] == i)]['id'].iloc[0]
+                t[c].append(temp)
+            except:
+                print('lol')
+        c = c + 1
+
+    bar = [1, 2, 3, 4, 5]
+    barwidth = 0.8
+    mal = plt.bar(bar, t[2], color='#2ECC71', width=barwidth, edgecolor='white')
+    fem = plt.bar(bar, t[1], color='#BB8FCE', bottom=t[2], width=barwidth, edgecolor='white')
+    unk = plt.bar(bar, t[0], color='#F4D03F', bottom=np.add(t[1], t[2]), width=barwidth, edgecolor='white')
+
+    plt.ylabel("Total", fontsize='xx-large')
+    plt.xlabel('Age Range', fontsize='xx-large')
+    plt.title('Age Distribution with Selected Countries', fontsize='xx-large')
+    plt.xticks(bar, choices, fontsize='xx-large')
+    plt.yticks(fontsize='xx-large')
+    plt.legend((unk[0], fem[0], mal[0]), ('Unknown', 'Female', 'Male'), fontsize='xx-large')
+    # plt.show()
+    st.pyplot()
+
+    mal = plt.bar(bar, np.sum(t, 0), color='#F4D03F', width=barwidth, edgecolor='white')
+
+    plt.ylabel("Total", fontsize='xx-large')
+    plt.xlabel('Age Range', fontsize='xx-large')
+    plt.title('Age Distribution with Selected Countries', fontsize='xx-large')
+    plt.xticks(bar, choices, fontsize='xx-large')
+    plt.yticks(fontsize='xx-large')
+    # plt.show()
+    st.pyplot()
+
+
+def plot_age_sub(user_date,cou):
+    # cou=['US','Other','FR','CA','GB','ES','IT','DE','NL','AU','PT']
+    # cou = ['AU', 'US']
+
+    a_x = user_date[user_date['Country Destination'].isin(cou)]
+    conditions = [
+        (a_x['Age'] >= 18) & (a_x['Age'] <= 30),
+        (a_x['Age'] >= 31) & (a_x['Age'] <= 40),
+        (a_x['Age'] >= 41) & (a_x['Age'] <= 50),
+        (a_x['Age'] >= 51) & (a_x['Age'] <= 60),
+        (a_x['Age'] >= 61)]
+    choices = ['18-30', '31-40', '41-50', '51-60', '60+']
+    a_x['age'] = np.select(conditions, choices)
+    a_x = a_x.groupby(['age', 'Gender']).agg('count').reset_index()
+    a_x = a_x[['age', 'Gender', 'id']]
+    a_x
+    plt.figure(figsize=(10, 7))
+    c = 0
+    t = []
+    for i in a_x['Gender'].unique():
+        t.append([])
+        for j in a_x['age'].unique():
+            try:
+                temp = a_x[(a_x['age'] == j) & (a_x['Gender'] == i)]['id'].iloc[0]
+                t[c].append(temp)
+            except:
+                print('lol')
+        c = c + 1
+
+
+    bar = [1, 2, 3, 4, 5]
+    barwidth = 0.2
+    unk = plt.bar(bar, t[0], color='#F4D03F', width=barwidth, edgecolor='white', label='Northeast')
+    fem = plt.bar([x + barwidth for x in bar], t[1], color='#BB8FCE', width=barwidth, edgecolor='white',
+                  label='Midwest')
+    mal = plt.bar([x + barwidth * 2 for x in bar], t[2], color='#2ECC71', width=barwidth, edgecolor='white',
+                  label='Midwest')
+    plt.ylabel("Total", fontsize='xx-large')
+    plt.xlabel('Age Range', fontsize='xx-large')
+    plt.title('Age Distribution with Selected Countries', fontsize='xx-large')
+    plt.xticks([x + barwidth for x in bar], choices, fontsize='xx-large')
+    plt.yticks(fontsize='xx-large')
+    # print()
+
+    plt.legend((unk[0], fem[0], mal[0]), ('Unknown', 'Female', 'Male'), fontsize='xx-large')
+    # plt.show()
     st.pyplot()
 
 
@@ -105,6 +207,14 @@ def visualization():
 
     plot_line_chart(c_x, options)
 
+    options1 = st.multiselect('Show age of the specific countries',
+                             ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
+
+    plot_age(user_date, options1)
+
+    plot_age_sub(user_date, options1)
+
 
 if __name__ == "__main__":
     visualization()
+
