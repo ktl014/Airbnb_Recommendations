@@ -10,6 +10,8 @@ import random
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import streamlit as st
 from sklearn.preprocessing import LabelEncoder
 
@@ -18,11 +20,10 @@ from src.eval_model import predict, load_model, evaluate_model
 from src.recommend import run_recommmendation
 from src.visualization.recommended_countries_viz import RecommendCountry
 from src import SessionState
+
 import pandas as pd
 import numpy as np
 import pydeck as pdk
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # Module Level Constants
 MODEL = './models/finalized_LRmodel.sav'
