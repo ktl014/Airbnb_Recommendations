@@ -68,7 +68,6 @@ def clean_data(x, cou):
 
 
 def plot_line_chart(c_x, cou):
-
     plt.figure(figsize=(10, 5))
 
     for i in cou:
@@ -88,19 +87,24 @@ def plot_line_chart(c_x, cou):
     st.pyplot()
 
 
-# === Start Streamlit Application ===#
-st.title("Airbnb System Visualization")
-st.markdown(
-    """
-        This is a demo of a Streamlit app that visualize the Airbnb dataset.
-        [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
-    """)
+def visualization():
+    # === Start Streamlit Application ===#
+    st.title("Airbnb System Visualization")
+    st.markdown(
+        """
+            This is a demo of a Streamlit app that visualize the Airbnb dataset.
+            [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
+        """)
 
-user_date = load_data()
+    user_date = load_data()
 
-options = st.multiselect('Show travelling rate of the specific countries',
-                         ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
+    options = st.multiselect('Show travelling rate of the specific countries',
+                             ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
 
-c_x = clean_data(user_date, options)
+    c_x = clean_data(user_date, options)
 
-plot_line_chart(c_x, options)
+    plot_line_chart(c_x, options)
+
+
+if __name__ == "__main__":
+    visualization()
