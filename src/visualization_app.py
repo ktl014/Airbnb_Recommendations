@@ -18,7 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def run():
+def load_data():
     user = pd.read_csv('airbnb-recruiting-new-user-bookings/train_users_2.csv')
 
     # clean up data
@@ -40,17 +40,18 @@ def run():
     user_date['First Booking Date'] = user_date['First Booking Date'].apply(lambda y: y.strftime('%Y-%m'))
     user_date['Gender'].replace({0: 'Unknown', 1: 'Male', 2: 'Female'}, inplace=True)
 
-    cou = st.multiselect('Show travelling rate of the specific countries',
-                         ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
+    return user_date
 
-    x = user_date
+
+def clean_data(x, cou):
     x = x[x['Country Destination'].isin(cou)]
     c_x = x.sort_values(['First Booking Date']).groupby(['First Booking Date', 'Country Destination']).agg(
         'count').reset_index()
 
     c_x = c_x[['First Booking Date', 'Country Destination', 'id']]
 
-    temp = list(c_x[c_x['Country Destination'] == cou[0]]['First Booking Date'])
+    if cou:
+        temp = list(c_x[c_x['Country Destination'] == cou[0]]['First Booking Date'])
 
     for i in cou:
         a = set(temp).difference(list(c_x[c_x['Country Destination'] == i]['First Booking Date']))
@@ -63,9 +64,16 @@ def run():
     c_x.sort_values(by=['First Booking Date'], inplace=True)
     c_x.reset_index(drop=True, inplace=True)
 
+    return c_x
+
+
+def plot_line_chart(c_x, cou):
+
     plt.figure(figsize=(10, 5))
 
     for i in cou:
+        if cou is None:
+            continue
         data = c_x[c_x['Country Destination'] == i]
         data = data.append(data)
         plt.plot('First Booking Date', 'id', data=c_x[c_x['Country Destination'] == i])
@@ -88,4 +96,11 @@ st.markdown(
         [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
     """)
 
-run()
+user_date = load_data()
+
+options = st.multiselect('Show travelling rate of the specific countries',
+                         ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
+
+c_x = clean_data(user_date, options)
+
+plot_line_chart(c_x, options)
