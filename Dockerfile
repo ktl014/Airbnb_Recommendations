@@ -20,6 +20,17 @@ SHELL ["conda", "run", "-n", "airbnb_env", "/bin/bash", "-c"]
 RUN echo "Make sure streamlit is installed:"
 RUN python -c "import streamlit"
 
+# streamlit-specific commands
+RUN mkdir -p /root/.streamlit
+RUN bash -c 'echo -e "\
+[general]\n\
+email = \"\"\n\
+" > /root/.streamlit/credentials.toml'
+RUN bash -c 'echo -e "\
+[server]\n\
+enableCORS = false\n\
+" > /root/.streamlit/config.toml'
+
 # Copy all the files from the project’s root to the working directory
 COPY . /app
 RUN ls -la /app/*
@@ -28,5 +39,5 @@ RUN ls -la /app/*
 EXPOSE 8501
 
 # The code to run when container is started:
-COPY src/navigation_app.py .
-ENTRYPOINT ["conda", "run", "-n", "airbnb_env", "streamlit run", "src/navigation_app.py"]
+SHELL ["conda", "run", "-n", "airbnb_env", "/bin/bash", "-c"]
+CMD [ "streamlit", "run", "src/app.py" ]
