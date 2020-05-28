@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 
 
 def load_data():
-    user = pd.read_csv('airbnb-recruiting-new-user-bookings/train_users_2.csv')
+    user = pd.read_csv('./airbnb-recruiting-new-user-bookings/train_users_2.csv')
 
     # clean up data
     user = user[(user['age'] < 110) & (user['age'] > 0) & (user['date_first_booking'] != '0')]
@@ -34,7 +34,15 @@ def load_data():
     user_date['Age'] = user_date['Age'].astype(int)
     user_date = user_date[(user_date['Age'] >= 18) & (100 >= user_date['Age'])]
     user_date.dropna(inplace=True)
-    user_date['First Booking Date'] = pd.to_datetime(user_date['First Booking Date'], format="%m/%d/%Y")
+    format = "%m/%d/%Y"
+    try:
+        user_date['First Booking Date'] = pd.to_datetime(user_date['First Booking Date'],
+                                                         format=format)
+    except:
+        format = "%Y-%m-%d"
+        user_date['First Booking Date'] = pd.to_datetime(user_date['First Booking Date'],
+                                                         format=format)
+
     user_date['First Booking Date'] = user_date['First Booking Date'].apply(lambda y: y.strftime('%Y-%m'))
     user_date['Gender'].replace({0: 'Unknown', 1: 'Male', 2: 'Female'}, inplace=True)
 
