@@ -62,13 +62,25 @@ class RecommendCountry():
         is known for its sturdy engineering, architecture, food, fashion, 
         art galleries & museums, castles & palaces, and truly world class cities"""
 
-        #TODO give better captions for NDF and other
+        self.captions["CA"] = """
+        The expanse of Canada's natural beauty, from mountains and glaciers to 
+        secluded lakes and forests, is almost unparalleled worldwide. But Canada's 
+        allure is not just the great outdoors. Canada has cosmopolitan cities that 
+        are clean, safe, friendly, and multicultural. In fact, Canada repeatedly is 
+        lauded as one of the world's most livable countries. Whether your interests 
+        are river rafting or live theater, Canada won’t disappoint.
+        """
+
         self.captions['NDF'] = """
-        Couldnt find you a country
+        Oops, no destination was found for the given user at this time :( We hope the 
+        user a wonderful future traveling experience if they return to our services 
+        and is excited for all the places they'll go.
         """
 
         self.captions['other'] = """
-        Couldnt find you a country
+        This user seems to be visiting the many other countries in the world. It sounds 
+        like a great destination! Hopefully one day, our recommendation system can 
+        learn it by name in the future.
         """
 
     def set_country_popular_age(self, csv_fname):

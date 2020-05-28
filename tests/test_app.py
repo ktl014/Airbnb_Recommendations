@@ -33,6 +33,14 @@ class TestStreamLitApp:
         assert (expected_predictions == predictions).all()
         assert expected_ndcg == ndcg
 
+        expected_predictions = ['No Destination Found', 'USA', 'Other',
+                                'France', 'Italy']
+        predictions, ndcg = run_recommmendation(dataset, '87mebub9p4', MODEL,
+                                                full_name=True)
+        assert expected_predictions == predictions
+        assert expected_ndcg == ndcg
+
+
 class TestSessionState():
     def test_SessionState(self):
         session_state = SessionState(user_name='', favorite_color='black')
