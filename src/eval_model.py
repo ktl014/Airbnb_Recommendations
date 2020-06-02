@@ -1,4 +1,8 @@
-"""Evaluate the model"""
+""" Evaluate the model
+
+Main script for running evaluation and containing evaluation modules
+
+"""
 
 # Standard dist
 import os
@@ -40,6 +44,17 @@ LABELS = './src/data/labels.txt'
 
 def main(csv_fnames=CSV_FNAMES, model_weights=MODEL_WEIGHTS, dataset_type=DATASET_TYPE,
          validate_model=VALIDATE_MODEL):
+    """ Main function for running eval_model
+
+    Args:
+        csv_fnames (dict): Dictionary of csv absolute paths
+        model_weights (str): Model weights path
+        dataset_type (str): Dataset type
+        validate_model (bool): Flag for validating the model
+
+    Returns:
+
+    """
     # load the model from disk
     model = load_model(model_weights)
 
@@ -121,9 +136,11 @@ def evaluate_model(gtruth, predictions, verbose=True, normalize=True, beta=0):
     return metrics, score
 
 def top_k_predictions(pred,k):
+    """Return top-k predictions"""
     return [np.argsort(pred[i])[::-1][:k].tolist() for i in range(len(pred))]
 
 def dcg_at_k(r, k, method=1):
+    """Compute discounted cumulative gain"""
     r = np.asfarray(r)[:k]
     if r.size:
         if method == 0:
@@ -136,6 +153,7 @@ def dcg_at_k(r, k, method=1):
 
 
 def ndcg_at_k(r, k=5, method=1):
+    """Compute normalized discounted cumulative gain"""
     dcg_max = dcg_at_k(sorted(r, reverse=True), k, method)
     if not dcg_max:
         return 0.
@@ -159,6 +177,7 @@ def score_predictions(preds, truth, n_modes=5):
     return score
 
 def predict(model, X):
+    """Run model inference and get top-k predictions"""
     prob = model.predict_proba(X)
     return top_k_predictions(prob, k=5)
 

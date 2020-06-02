@@ -12,6 +12,7 @@ import csv
 
 # pass in relative path to Kevin's baseline csv and Alex + Shreeman's merged sessions csv
 def mergeBaselineAndSessionFeatures(baselinePath, sessionPath, outputCSVPath):
+    """Merge baseline and processed sessions features"""
     baselineData = defaultdict(list)
     sessionData = defaultdict(list)
     header = []

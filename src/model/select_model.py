@@ -1,3 +1,7 @@
+""" Model Selection script via CrossValidation
+
+Model selection is done over a mixture of discriminative and generative models
+"""
 # Standard dist imports
 import os
 import datetime
@@ -49,6 +53,16 @@ MODELS = [
 ]
 
 def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, models=MODELS):
+    """ Main function for executing model selection
+
+    Args:
+        csv_fnames (dict): Dictionary of csv absolute paths
+        dataset_type (str): Dataset type
+        models (list): List of scikit learn models
+
+    Returns:
+
+    """
     # Read in training set and encode labels
     class AirBnB():
         pass

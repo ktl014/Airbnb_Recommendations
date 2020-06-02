@@ -1,3 +1,9 @@
+""" Module for Recommendation system Visualization
+
+Module includes setting captions, figures, and getting summary statistics within
+RecommendCountry().
+
+"""
 from collections import defaultdict
 import glob
 import os
@@ -6,7 +12,16 @@ from PIL import Image
 import pandas as pd
 
 class RecommendCountry():
+    """ Module for visualizing country recommendations
+
+    """
     def __init__(self, seasons_csv=None):
+        """ Initializes RecommendCountry() and sets country images and captions
+
+        Args:
+            seasons_csv (str): Absolute path to seasons csv
+        """
+
         self.set_country_image()
 
         self.set_country_caption()
@@ -15,12 +30,14 @@ class RecommendCountry():
             self.seasons = pd.read_csv(seasons_csv, index_col='tfa_seasons')
 
     def set_country_image(self):
+        """Set country images for possible country destinations"""
         countries = glob.glob('./airbnb-recruiting-new-user-bookings/figs/*')
         self.country_names = [os.path.basename(fname).split('.')[0] for fname in
                               countries]
         self.images = dict(zip(self.country_names, countries))
 
     def set_country_caption(self):
+        """Sets country captions for possible country destinations"""
         self.captions = {}
         self.captions['IT'] = """
         Of the countries on our list, Italy is one of the most popular destination. 
@@ -100,6 +117,7 @@ class RecommendCountry():
         self.popular_age = popular_age
 
     def get_popular_seasons(self, country):
+        """Get popular season for a country"""
         seasons_by_months = {
             'spring': ['March', 'April', 'May'],
             'summer': ['June', 'July', 'August'],
@@ -112,10 +130,10 @@ class RecommendCountry():
         return popular_season, str_months
 
     def get_country_image(self, country):
+        """Returns image of country given desired country"""
         return Image.open(self.images[country])
 
     def get_image_caption(self, country):
+        """Returns caption of country given desired country"""
         return self.captions[country]
 
-    def get_country_info(self, country):
-        img_fname = self.images[country.upper()]

@@ -1,3 +1,8 @@
+""" Recommendation module
+
+Module for running model recommendation
+
+"""
 from sklearn.preprocessing import LabelEncoder
 from src.data.d_utils import sample_data, preprocess_data
 from src.eval_model import predict, load_model, evaluate_model
@@ -20,6 +25,17 @@ COUNTRY_ABB2NAME = {
  'other': 'Other'}
 
 def run_recommmendation(dataset, id, model_weights, full_name=False):
+    """ Run model recommendations
+
+    Args:
+        dataset (Airbnb): Named tuple collection, Airbnb
+        id (str): User ID
+        model_weights (str): Model path weights
+        full_name (bool): Flag for country full name
+
+    Returns:
+
+    """
     le = LabelEncoder().fit(open(LABELS).read().splitlines())
 
     d, id = sample_data(dataset.users_feat, id=id)

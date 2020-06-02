@@ -52,8 +52,8 @@ CSV_FNAMES = {
 DATASET_TYPE = 'merged_sessions'
 
 # Model Default
-XGB_MODEL = False
-SAVE = False
+XGB_MODEL = True
+SAVE = True
 
 # EXPERIMENTAL_FEATURES
 STATS_flag = True
@@ -69,7 +69,7 @@ def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, xgb_model=XGB_MODEL, 
     airbnb = AirBnB()
     airbnb.X = read_in_dataset(csv_fnames['train-{}'.format(dataset_type)],
                                verbose=True, keep_id=False)
-    # Select here which experimeental features to run
+    # Select here which experimental features to run
     # default is the baseline
     airbnb.X = experiment_features(data=airbnb.X,
                                    stats=STATS_flag,
@@ -159,7 +159,7 @@ def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, xgb_model=XGB_MODEL, 
         idx = airbnb.test_id[i]
         ids += [idx] * 5
         cts += airbnb.le.inverse_transform(np.argsort(airbnb.y_pred_test[i])[::-1])[:5].tolist()
-    print('complete')
+
     #Generate submission
     sub = pd.DataFrame(np.column_stack((ids, cts)), columns=['id', 'country'])
     sub.to_csv('sub.csv',index=False)

@@ -13,11 +13,28 @@ the Airbnb dataset.
 ### System Requirements
 1. Python 3.6 or higher
 2. Python libraries: pandas, scikit-learn, matplotlib, numpy, tqdm, xgb
-3. Example: Create a python environment called `airbnb_env` and install required
- libraries using conda:
-- `conda create -y -n airbnb_env`
-- `conda activate airbnb_env`
-- `pip install -r requirements.txt`
+
+#### Conda Setup Instructions
+If you are using conda, you can get started by cloning this repository and using the 
+environment.yaml file as in the following:
+```bash
+conda env create -n airbnb_env -f env.yml
+```
+and then activate the environment using the following,
+```bash
+conda activate airbnb_env
+```
+
+#### Docker Setup Instructions
+If you are using docker, there is a Dockerfile included. 
+After cloning this repository, you can build the image with the following,
+```bash
+docker build -t airbnb_recommender .
+```
+and then run it locally using,
+```bash
+docker run -it -p 8501:8501 airbnb_recommender
+```
 
 ### Download required files
 Download the [dataset](https://www.kaggle.com/c/airbnb-recruiting-new-user-bookings/data) and store it within the project dir as `airbnb-recruiting-new-user-bookings`.
@@ -37,7 +54,7 @@ python train_model.py
 
 ## Running streamlit application
 ```bash
-streamlit run src/app.py
+streamlit run src/navigation_app.py
 ```
 
 Directory Structure
