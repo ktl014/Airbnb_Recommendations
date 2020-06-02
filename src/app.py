@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from PIL import Image
 import streamlit as st
 
 from src.data.d_utils import sample_data, load_data
@@ -126,7 +127,8 @@ def run():
                  f'first booking experience')
 
     else:
-        st.write("Press the above button..")
+        st.write("Press the above button to see the recommended countries on the "
+                 "world map")
 
     # === Display predictions ===#
     display_predictions(session_state.predictions)
@@ -189,10 +191,13 @@ def display_map(predictions):
 def recommendation():
     # === Start Streamlit Application ===#
     st.title("Airbnb Recomendation System")
+    st.image(Image.open('airbnb-recruiting-new-user-bookings/figs'
+                        '/recommendation_front_page.jpg'), use_column_width=True)
     st.markdown(
         """
-            This is a demo of a Streamlit app that shows Airbnb recomendation for travellers.
-            [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
+            This is a demo of a Streamlit app that shows Airbnb recomendation for 
+            travellers.\n\nBegin by generating a random user ID for our system to give 
+            its country recommendation and relevant travel information.
         """)
     run()
 

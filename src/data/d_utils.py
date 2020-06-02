@@ -7,6 +7,7 @@ Data utilities module currently contains helper functions for the following:
 
 """
 from collections import namedtuple
+import os
 import random
 
 import pandas as pd

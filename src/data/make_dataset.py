@@ -4,12 +4,6 @@ This script features creating datasets in multiple fashions:
 - raw baseline features <--- cleaned up data prior to feature engineering
 - feature engineered datasets
 
-One can choose between the two by setting the module level constants
-```
-    do_baseline = False
-    do_merged_sessions = True
-```
-
 """
 # Standard Dist imports
 import os

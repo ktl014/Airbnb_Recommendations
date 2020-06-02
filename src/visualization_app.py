@@ -14,6 +14,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
 
 
 def load_data():
@@ -199,15 +200,26 @@ def plot_age_sub(user_date,cou):
 
 def visualization():
     # === Start Streamlit Application ===#
-    st.title("Airbnb System Visualization")
+    st.title("Airbnb Data Analytics")
+    st.image(Image.open('airbnb-recruiting-new-user-bookings/figs'
+                        '/data_analytics_front_page.jpg'), use_column_width=True)
     st.markdown(
         """
-            This is a demo of a Streamlit app that visualize the Airbnb dataset.
-            [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
+            Interested in what are popular destination spots?\n\nWhat about who is 
+            visiting them?\n\nAre there any patterns within the data?\n\nIf you 
+            answered yes to any of these questions, please take a look at our data 
+            analysis of Airbnb's country booking dataset to find out the answers and 
+            other relevant information.
         """)
 
     user_date = load_data()
 
+    st.header("Part 1: Airbnb Travelers 101")
+    st.markdown("This section focuses on investigating the lay of the land with "
+                "Airbnb's country booking dataset i.e. exploring what countries are "
+                "being visited, when is this happening, etc.")
+    st.subheader("Part 1.1 What countries are being visited the most?")
+    st.subheader("Part 1.2 When is the travelling taking place?")
     options = st.multiselect('Show travelling rate of the specific countries',
                              ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
 
@@ -215,12 +227,21 @@ def visualization():
 
     plot_line_chart(c_x, options)
 
+    st.subheader("Part 1.3 Who are the travellers?")
     options1 = st.multiselect('Show age of the specific countries',
                              ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
 
     plot_age(user_date, options1)
 
     plot_age_sub(user_date, options1)
+
+    st.header("Part 2: Successful Booking vs No Booking")
+    st.markdown("In ideal world for Airbnb, users, who visit their website, would end "
+                "up making a booking. However, this isn't the case. We seek to "
+                "investigate what are similarities and differences between users who "
+                "make a successful booking vs users who do not book.")
+    st.subheader("Part 2.1")
+    st.subheader("Part 2.2")
 
 
 if __name__ == "__main__":

@@ -15,22 +15,33 @@ from src.visualization_app import visualization
 
 
 def main():
-    page = st.sidebar.selectbox("Choose a page", ["Homepage", "Recommendation System", "Visualization"])
+    page = st.sidebar.selectbox("Choose a page", ["Homepage", "Data Analytics",
+                                                  "Recommendation System"])
 
     if page == "Homepage":
-        st.title("Homepage")
+        st.title("Airbnb Country Analytics & Recommendation")
         st.markdown(
             """
-                This is a demo of a Streamlit app that shows Airbnb Recommendation System.
+                The **purpose** of the **Airbnb Country Analytics & Recommendation 
+                project** is to share knowledge on travelling patterns and make 
+                accurate predictions for where a user may go for their first 
+                experience. The larger implication of this work would be to decrease 
+                average time to first booking and better forecast demand.\n\n
+                This application provides
+                - A **comprehensive analysis** of Airbnb's travelling data
+                - A **vision** on how awesome machine learning can be for sharing 
+                personalized content.
             """)
-        st.header('A little bit background')
+        st.header('The Magic of our Data Analytics & Recommendation System')
+        st.markdown("The only way to truly understand how magical our application is "
+                    "to play around with it. But if you need ot be convinced first, "
+                    "please stay tuned for our presentation!")
 
+    elif page == "Data Analytics":
+        visualization()
 
     elif page == "Recommendation System":
         recommendation()
-
-    elif page == "Visualization":
-        visualization()
 
 
 if __name__ == "__main__":
