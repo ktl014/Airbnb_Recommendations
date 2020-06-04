@@ -94,6 +94,20 @@ def plot_line_chart(c_x, cou):
     st.pyplot()
 
 
+def plot_country_most_visited(user_date):
+    cou = ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT']
+    # cou=['CA']
+
+    a_x = user_date[user_date['Country Destination'].isin(cou)]
+    a_x = a_x.groupby(['Country Destination']).agg('count').reset_index()
+    a_x = a_x[['Country Destination', 'id']].sort_values(['id'], ascending=False)
+    a_x.plot.bar(x='Country Destination', y='id', rot=0, logy=True, legend=False, fontsize='xx-large')
+    # plt.ylabel("Total",fontsize='xx-large')
+    plt.xlabel('', fontsize='xx-large')
+    plt.title('Travelling Rate by Country', fontsize='xx-large')
+    st.pyplot()
+
+
 def plot_age(user_date, cou):
     # cou=['US','Other','FR','CA','GB','ES','IT','DE','NL','AU','PT']
     # cou = ['AU', 'US']
@@ -138,65 +152,6 @@ def plot_age(user_date, cou):
     # plt.show()
     st.pyplot()
 
-    mal = plt.bar(bar, np.sum(t, 0), color='#F4D03F', width=barwidth, edgecolor='white')
-
-    plt.ylabel("Total", fontsize='xx-large')
-    plt.xlabel('Age Range', fontsize='xx-large')
-    plt.title('Age Distribution with Selected Countries', fontsize='xx-large')
-    plt.xticks(bar, choices, fontsize='xx-large')
-    plt.yticks(fontsize='xx-large')
-    # plt.show()
-    st.pyplot()
-
-
-def plot_age_sub(user_date,cou):
-    # cou=['US','Other','FR','CA','GB','ES','IT','DE','NL','AU','PT']
-    # cou = ['AU', 'US']
-
-    a_x = user_date[user_date['Country Destination'].isin(cou)]
-    conditions = [
-        (a_x['Age'] >= 18) & (a_x['Age'] <= 30),
-        (a_x['Age'] >= 31) & (a_x['Age'] <= 40),
-        (a_x['Age'] >= 41) & (a_x['Age'] <= 50),
-        (a_x['Age'] >= 51) & (a_x['Age'] <= 60),
-        (a_x['Age'] >= 61)]
-    choices = ['18-30', '31-40', '41-50', '51-60', '60+']
-    a_x['age'] = np.select(conditions, choices)
-    a_x = a_x.groupby(['age', 'Gender']).agg('count').reset_index()
-    a_x = a_x[['age', 'Gender', 'id']]
-    a_x
-    plt.figure(figsize=(10, 7))
-    c = 0
-    t = []
-    for i in a_x['Gender'].unique():
-        t.append([])
-        for j in a_x['age'].unique():
-            try:
-                temp = a_x[(a_x['age'] == j) & (a_x['Gender'] == i)]['id'].iloc[0]
-                t[c].append(temp)
-            except:
-                print('lol')
-        c = c + 1
-
-
-    bar = [1, 2, 3, 4, 5]
-    barwidth = 0.2
-    unk = plt.bar(bar, t[0], color='#F4D03F', width=barwidth, edgecolor='white', label='Northeast')
-    fem = plt.bar([x + barwidth for x in bar], t[1], color='#BB8FCE', width=barwidth, edgecolor='white',
-                  label='Midwest')
-    mal = plt.bar([x + barwidth * 2 for x in bar], t[2], color='#2ECC71', width=barwidth, edgecolor='white',
-                  label='Midwest')
-    plt.ylabel("Total", fontsize='xx-large')
-    plt.xlabel('Age Range', fontsize='xx-large')
-    plt.title('Age Distribution with Selected Countries', fontsize='xx-large')
-    plt.xticks([x + barwidth for x in bar], choices, fontsize='xx-large')
-    plt.yticks(fontsize='xx-large')
-    # print()
-
-    plt.legend((unk[0], fem[0], mal[0]), ('Unknown', 'Female', 'Male'), fontsize='xx-large')
-    # plt.show()
-    st.pyplot()
-
 
 def visualization():
     # === Start Streamlit Application ===#
@@ -214,11 +169,18 @@ def visualization():
 
     user_date = load_data()
 
+    # ===========part 1===========
     st.header("Part 1: Airbnb Travelers 101")
     st.markdown("This section focuses on investigating the lay of the land with "
                 "Airbnb's country booking dataset i.e. exploring what countries are "
                 "being visited, when is this happening, etc.")
+
+    # ===========part 1.1 countries visited most===========
     st.subheader("Part 1.1 What countries are being visited the most?")
+
+    plot_country_most_visited(user_date)
+
+    # ===========part 1.2 when travelling takes place===========
     st.subheader("Part 1.2 When is the travelling taking place?")
     options = st.multiselect('Show travelling rate of the specific countries',
                              ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
@@ -227,13 +189,14 @@ def visualization():
 
     plot_line_chart(c_x, options)
 
+    # ===========part 1.3 who are the travels===========
     st.subheader("Part 1.3 Who are the travellers?")
     options1 = st.multiselect('Show age of the specific countries',
                              ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
 
     plot_age(user_date, options1)
 
-    plot_age_sub(user_date, options1)
+    # plot_age_sub(user_date, options1)
 
     st.header("Part 2: Successful Booking vs No Booking")
     st.markdown("In ideal world for Airbnb, users, who visit their website, would end "
