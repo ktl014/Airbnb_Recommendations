@@ -193,11 +193,26 @@ def plot_age(user_date, cou):
 
 def load_data_part2():
     """"
-    load data fro part 2 visualization from session.csv and train_user_2.csv
+    load data for part 2 visualization from session.csv and train_user_2.csv
 
     prepare for further use of making plots in part 2
 
+    Returns:
+        DataFrame df,
+            the session information of users whose desination is known,
+            (the intersection between session.csv and train_user_2.csv)
+
+        dict device_dic,
+            {user_id: device_type}, the device type of each user
+
+        dict result_dic,
+            {user_id: country_destination}, the destination of each user
+
+        dict lang_dic,
+            {user_id: language}, the language of each user
+
     """
+
     s_df = pd.read_csv('./airbnb-recruiting-new-user-bookings/sessions.csv')
     t_df = pd.read_csv('./airbnb-recruiting-new-user-bookings/train_users_2.csv')
 
@@ -216,6 +231,13 @@ def load_data_part2():
 def plot_avg_time_action_type(df, device_dic, result_dic):
     """
     plot for part 2.1 what steps are taken for booking a travel destination
+
+    Args:
+        df (dataframe): the input dataframe that we are going to plot about
+
+        device_dic (dict): {user_id: device_type}, the device type of each user
+
+        result_dic (dict): {user_id: country_destination}, the destination of each user
 
     """
     tmpdf = pd.DataFrame(df.groupby(['user_id', 'action_type'])['secs_elapsed'].agg(np.sum))
@@ -239,7 +261,6 @@ def plot_avg_time_action_type(df, device_dic, result_dic):
 
 
 def plot_language_time(df, device_dic, result_dic, lang_dic):
-
     """"
     make a plots for part 2.2 and part 2.3.
 
@@ -247,7 +268,18 @@ def plot_language_time(df, device_dic, result_dic, lang_dic):
 
     2.3. devices have higher success rates when booking a destination
 
+    Args:
+        df (dataframe): the input dataframe that we are going to plot about
+
+        device_dic (dict): {user_id: device_type}, the device type of each user
+
+        result_dic (dict): {user_id: country_destination}, the destination of each user
+
+        lang_dic (dict): {user_id: language}, the language of each user
+
+
     """
+
     id_grouped = df.groupby('user_id')
 
     id_df = pd.DataFrame(id_grouped['secs_elapsed'].agg([np.sum, np.mean, np.std]))
@@ -265,6 +297,7 @@ def plot_language_time(df, device_dic, result_dic, lang_dic):
     plt.xticks(rotation="45")
     st.pyplot()
 
+    # ===========part 2.3 ============
     st.subheader("Part 2.3.")
     st.markdown("Which devices have higher success rates when booking a destination?")
     device_df = pd.DataFrame({'NDF': id_df[id_df['country_destination'] == 'NDF'].groupby('device')['sum'].agg(np.size),
@@ -342,10 +375,12 @@ def visualization():
 
     df, device_dic, result_dic, lang_dic = load_data_part2()
 
+    # ===========part 2.1===========
     st.subheader("Part 2.1")
     st.markdown("What steps are taken for booking a travel destination?")
     plot_avg_time_action_type(df, device_dic, result_dic)
 
+    # ===========part 2.2 & 2.3===========
     st.subheader("Part 2.2")
     st.markdown("Is there any difference in time consuming when using different languages?")
     plot_language_time(df, device_dic, result_dic, lang_dic)
