@@ -308,9 +308,6 @@ def plot_language_time(df, device_dic, result_dic, lang_dic):
 
 
     # ===========part 2.3 ============
-    st.subheader("Part 2.3.")
-    st.markdown("Which devices have higher success rates when booking a destination?")
-
     st.subheader("Part 2.3 Do devices play a role in this comparisons?")
 
     device_df = pd.DataFrame({'NDF': id_df[id_df['country_destination'] == 'NDF'].groupby('device')['sum'].agg(np.size),
@@ -391,20 +388,11 @@ def visualization():
     df, device_dic, result_dic, lang_dic = load_data_part2()
 
     # ===========part 2.1===========
-    st.subheader("Part 2.1")
-    st.markdown("What steps are taken for booking a travel destination?")
-    plot_avg_time_action_type(df, device_dic, result_dic)
-
-    # ===========part 2.2 & 2.3===========
-    st.subheader("Part 2.2")
-    st.markdown("Is there any difference in time consuming when using different languages?")
-
     st.subheader("Part 2.1 Is there a pattern in the elapsed time of an action?")
     plot_avg_time_action_type(df, device_dic, result_dic)
 
     # ===========part 2.2 and 2.3 =========== #
     st.subheader("Part 2.2 Delving deeper into the elapsed time")
-    st.markdown("Is there a difference in the elapsed time when using an international interface?")
 
     plot_language_time(df, device_dic, result_dic, lang_dic)
 
