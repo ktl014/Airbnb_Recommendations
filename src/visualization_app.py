@@ -18,6 +18,10 @@ from PIL import Image
 
 
 def load_data():
+    """
+    load data from train_user_2.csv for future use in part 1
+
+    """
     user = pd.read_csv('./airbnb-recruiting-new-user-bookings/train_users_2.csv')
 
     # clean up data
@@ -51,6 +55,14 @@ def load_data():
 
 
 def clean_data(x, cou):
+    """
+        Clean dataframe by removing NA values and keep useful columns.
+
+        x: dataframe
+        cou: list of countries
+
+     """
+
     x = x[x['Country Destination'].isin(cou)]
     c_x = x.sort_values(['First Booking Date']).groupby(['First Booking Date', 'Country Destination']).agg(
         'count').reset_index()
@@ -75,6 +87,15 @@ def clean_data(x, cou):
 
 
 def plot_line_chart(c_x, cou):
+    """
+    Show plot of visited frquency by date with selected countries.
+
+    Parameters
+    ----------
+    c_x: dataframe
+    cou: list of countries
+
+    """
     plt.figure(figsize=(10, 5))
 
     for i in cou:
@@ -95,6 +116,15 @@ def plot_line_chart(c_x, cou):
 
 
 def plot_country_most_visited(user_date):
+
+    """
+    Show visualization of visited frquency with selected countries.
+
+    Parameters
+    ----------
+    user_date: dataframe
+
+    """
     cou = ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT']
     # cou=['CA']
 
@@ -109,6 +139,15 @@ def plot_country_most_visited(user_date):
 
 
 def plot_age(user_date, cou):
+    """
+    Show visualization of visitor demograph with selected countries.
+
+    Parameters
+    ----------
+    user_date: dataframe
+    cou: list of countries
+
+    """
     # cou=['US','Other','FR','CA','GB','ES','IT','DE','NL','AU','PT']
     # cou = ['AU', 'US']
 
@@ -149,7 +188,104 @@ def plot_age(user_date, cou):
     plt.xticks(bar, choices, fontsize='xx-large')
     plt.yticks(fontsize='xx-large')
     plt.legend((unk[0], fem[0], mal[0]), ('Unknown', 'Female', 'Male'), fontsize='xx-large')
-    # plt.show()
+    st.pyplot()
+
+
+def load_data_part2():
+    """"
+    load data fro part 2 visualization from session.csv and train_user_2.csv
+
+    prepare for further use of making plots in part 2
+
+    """
+    s_df = pd.read_csv('./airbnb-recruiting-new-user-bookings/sessions.csv')
+    t_df = pd.read_csv('./airbnb-recruiting-new-user-bookings/train_users_2.csv')
+
+    result_dic = t_df.set_index('id')['country_destination'].to_dict()
+    lang_dic = t_df.set_index('id')['language'].to_dict()
+    device_dic = t_df.set_index('id')['first_device_type'].to_dict()
+
+    s_df['country_destination'] = s_df.user_id.apply(lambda x: result_dic[x] if x in result_dic.keys() else '0')
+    s_df['lang'] = s_df.user_id.apply(lambda x: lang_dic[x] if x in lang_dic.keys() else '0')
+
+    df = s_df[s_df['country_destination'] != '0']
+
+    return df, device_dic, result_dic, lang_dic
+
+
+def plot_avg_time_action_type(df, device_dic, result_dic):
+    """
+    plot for part 2.1 what steps are taken for booking a travel destination
+
+    """
+    tmpdf = pd.DataFrame(df.groupby(['user_id', 'action_type'])['secs_elapsed'].agg(np.sum))
+    tmpdf['id'] = tmpdf.index.map(lambda x: x[0])
+    tmpdf['action'] = tmpdf.index.map(lambda x: x[1])
+    tmpdf['device_type'] = tmpdf.id.apply(lambda x: device_dic[x] if x in device_dic.keys() else '0')
+    tmpdf['country_destination'] = tmpdf.id.apply(lambda x: result_dic[x] if x in result_dic.keys() else '0')
+
+    str1 = 'Unsuccessful booking'
+    str2 = 'Successful booking'
+
+    ax = pd.DataFrame(
+        {str2: tmpdf[tmpdf['country_destination'] != 'NDF'].groupby('action_type')['secs_elapsed'].agg(np.mean),
+         str1: tmpdf[tmpdf['country_destination'] == 'NDF'].groupby('action_type')['secs_elapsed'].agg(np.mean)
+         }).plot.barh(title='Average time spent on each action type for a single user',figsize=(12,8))
+
+
+    plt.ylabel('Action type')
+    plt.xlabel('Time/ms',fontsize="xx-large")
+    st.pyplot()
+
+
+def plot_language_time(df, device_dic, result_dic, lang_dic):
+
+    """"
+    make a plots for part 2.2 and part 2.3.
+
+    2.2. average time that a single user spends during booking with respect to languages
+
+    2.3. devices have higher success rates when booking a destination
+
+    """
+    id_grouped = df.groupby('user_id')
+
+    id_df = pd.DataFrame(id_grouped['secs_elapsed'].agg([np.sum, np.mean, np.std]))
+    id_df['country_destination'] = id_df.index.map(lambda x: result_dic[x] if x in result_dic.keys() else '0')
+    id_df['language'] = id_df.index.map(lambda x: lang_dic[x] if x in lang_dic.keys() else '0')
+    id_df['device'] = id_df.index.map(lambda x: device_dic[x] if x in device_dic.keys() else '0')
+    full_lang = {'en': 'English', 'zh': 'Chinese', 'ko': 'Korean', 'fr': 'French', 'es': 'Spanish',
+                 'de': 'German', 'ru': 'Russian', 'it': 'Italian', 'ja': 'Japanese', 'pt': 'Portuguese'}
+    id_df['full_language'] = id_df.language.apply(lambda x: full_lang[x] if x in full_lang.keys() else '0')
+
+    id_df[id_df['full_language'] != '0'].boxplot(column='sum', by='full_language', showfliers=False, patch_artist=True)
+    plt.title('Average time that a single user spend during booking')
+    plt.ylabel('Time/ms')
+    plt.xlabel('Language')
+    plt.xticks(rotation="45")
+    st.pyplot()
+
+    st.subheader("Part 2.3.")
+    st.markdown("Which devices have higher success rates when booking a destination?")
+    device_df = pd.DataFrame({'NDF': id_df[id_df['country_destination'] == 'NDF'].groupby('device')['sum'].agg(np.size),
+                              'DF': id_df[id_df['country_destination'] != 'NDF'].groupby('device')['sum'].agg(np.size)
+                              })
+
+    str1 = 'Unsuccessful booking'
+    str2 = 'Successful booking'
+
+    device_usernum = dict(id_df.groupby('device')['country_destination'].agg(np.size))
+    device_df['total_number'] = device_df.index.map(lambda x: device_usernum[x] if x in device_usernum.keys() else '0')
+
+    device_df[str1] = device_df.eval('NDF / total_number * 100')
+    device_df[str2] = device_df.eval('DF / total_number * 100')
+    device_df = device_df.sort_values(by="total_number", ascending=True)
+
+    device_df[[str2, str1]].plot.barh(stacked=True,legend=False,figsize=(12,7))
+    plt.ylabel('Device type(sorted)')
+    plt.xlabel('Percentage',fontsize="xx-large")
+    plt.title('Success rate on each device')
+    plt.legend(loc='lower left',bbox_to_anchor=(-0.1,-0.1))
     st.pyplot()
 
 
@@ -192,7 +328,7 @@ def visualization():
     # ===========part 1.3 who are the travels===========
     st.subheader("Part 1.3 Who are the travellers?")
     options1 = st.multiselect('Show age of the specific countries',
-                             ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
+                              ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
 
     plot_age(user_date, options1)
 
@@ -203,10 +339,17 @@ def visualization():
                 "up making a booking. However, this isn't the case. We seek to "
                 "investigate what are similarities and differences between users who "
                 "make a successful booking vs users who do not book.")
+
+    df, device_dic, result_dic, lang_dic = load_data_part2()
+
     st.subheader("Part 2.1")
+    st.markdown("What steps are taken for booking a travel destination?")
+    plot_avg_time_action_type(df, device_dic, result_dic)
+
     st.subheader("Part 2.2")
+    st.markdown("Is there any difference in time consuming when using different languages?")
+    plot_language_time(df, device_dic, result_dic, lang_dic)
 
 
 if __name__ == "__main__":
     visualization()
-
