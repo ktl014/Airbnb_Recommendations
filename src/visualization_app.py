@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-
+@st.cache(suppress_st_warning=True)
 def load_data():
     """
     load data from train_user_2.csv for future use in part 1
@@ -86,7 +86,7 @@ def clean_data(x, cou):
     return c_x
 
 
-def plot_line_chart(c_x, cou):
+def plot_country_time_series(c_x, cou):
     """
     Show plot of visited frquency by date with selected countries.
 
@@ -96,7 +96,7 @@ def plot_line_chart(c_x, cou):
     cou: list of countries
 
     """
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(11, 9))
 
     for i in cou:
         if cou is None:
@@ -105,13 +105,16 @@ def plot_line_chart(c_x, cou):
         data = data.append(data)
         plt.plot('First Booking Date', 'id', data=c_x[c_x['Country Destination'] == i])
         plt.yscale('log')
+    fontsize = 'xx-large'
 
-    plt.legend(tuple(cou))
-    plt.xlabel('Booking Date', fontsize='xx-large')
-    plt.title('Travelling Rate', fontsize='xx-large')
-    plt.ylabel('Total (log)', fontsize='xx-large')
+    plt.legend(tuple(cou), fontsize=fontsize)
+    plt.xlabel('Bookings from 2010-2015', fontsize=fontsize)
+    plt.title('Country Booking Trends', fontsize=fontsize)
+    plt.ylabel('Number of Bookings (log)', fontsize=fontsize)
     plt.xticks(np.arange(1, 73, 6), ['Jan-10', 'July-10', 'Jan-11', 'July-11', 'Jan-12', 'July-12',
-                                     'Jan-13', 'July-13', 'Jan-14', 'July-14', 'Jan-15'])
+                                     'Jan-13', 'July-13', 'Jan-14', 'July-14',
+                                     'Jan-15'], fontsize=fontsize, rotation=30)
+    plt.yticks(fontsize=fontsize)
     st.pyplot()
 
 
@@ -127,14 +130,16 @@ def plot_country_most_visited(user_date):
     """
     cou = ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT']
     # cou=['CA']
-
+    plt.figure(figsize=(10, 5))
+    fontsize = 'large'
     a_x = user_date[user_date['Country Destination'].isin(cou)]
     a_x = a_x.groupby(['Country Destination']).agg('count').reset_index()
     a_x = a_x[['Country Destination', 'id']].sort_values(['id'], ascending=False)
-    a_x.plot.bar(x='Country Destination', y='id', rot=0, logy=True, legend=False, fontsize='xx-large')
-    # plt.ylabel("Total",fontsize='xx-large')
-    plt.xlabel('', fontsize='xx-large')
-    plt.title('Travelling Rate by Country', fontsize='xx-large')
+    a_x.plot.bar(x='Country Destination', y='id', rot=0, logy=True, legend=False,
+                 fontsize=fontsize)
+    plt.ylabel("Total Bookings (logged)",fontsize=fontsize)
+    plt.xlabel('Countries', fontsize=fontsize)
+    plt.title('Frequency of Country Bookings from 2010-2015', fontsize=fontsize)
     st.pyplot()
 
 
@@ -182,15 +187,16 @@ def plot_age(user_date, cou):
     fem = plt.bar(bar, t[1], color='#BB8FCE', bottom=t[2], width=barwidth, edgecolor='white')
     unk = plt.bar(bar, t[0], color='#F4D03F', bottom=np.add(t[1], t[2]), width=barwidth, edgecolor='white')
 
-    plt.ylabel("Total", fontsize='xx-large')
-    plt.xlabel('Age Range', fontsize='xx-large')
-    plt.title('Age Distribution with Selected Countries', fontsize='xx-large')
-    plt.xticks(bar, choices, fontsize='xx-large')
-    plt.yticks(fontsize='xx-large')
-    plt.legend((unk[0], fem[0], mal[0]), ('Unknown', 'Female', 'Male'), fontsize='xx-large')
+    fontsize = 'xx-large'
+    plt.ylabel("Total", fontsize=fontsize)
+    plt.xlabel('Age Range', fontsize=fontsize)
+    plt.title('Age Distribution with Selected Countries', fontsize=fontsize)
+    plt.xticks(bar, choices, fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
+    plt.legend((unk[0], fem[0], mal[0]), ('Unknown', 'Female', 'Male'), fontsize=fontsize)
     st.pyplot()
 
-
+@st.cache(suppress_st_warning=True)
 def load_data_part2():
     """"
     load data fro part 2 visualization from session.csv and train_user_2.csv
@@ -227,14 +233,17 @@ def plot_avg_time_action_type(df, device_dic, result_dic):
     str1 = 'Unsuccessful booking'
     str2 = 'Successful booking'
 
+    fontsize = 'large'
     ax = pd.DataFrame(
         {str2: tmpdf[tmpdf['country_destination'] != 'NDF'].groupby('action_type')['secs_elapsed'].agg(np.mean),
          str1: tmpdf[tmpdf['country_destination'] == 'NDF'].groupby('action_type')['secs_elapsed'].agg(np.mean)
-         }).plot.barh(title='Average time spent on each action type for a single user',figsize=(12,8))
+         }).plot.barh(figsize=(12,5))
 
-
-    plt.ylabel('Action type')
-    plt.xlabel('Time/ms',fontsize="xx-large")
+    plt.title('Average Time spent on an Action', fontsize=fontsize)
+    plt.ylabel('Action type', fontsize=fontsize)
+    plt.xlabel('Time/ms', fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
+    plt.xticks(fontsize=fontsize)
     st.pyplot()
 
 
@@ -265,8 +274,7 @@ def plot_language_time(df, device_dic, result_dic, lang_dic):
     plt.xticks(rotation="45")
     st.pyplot()
 
-    st.subheader("Part 2.3.")
-    st.markdown("Which devices have higher success rates when booking a destination?")
+    st.subheader("Part 2.3 Do devices play a role in this comparisons?")
     device_df = pd.DataFrame({'NDF': id_df[id_df['country_destination'] == 'NDF'].groupby('device')['sum'].agg(np.size),
                               'DF': id_df[id_df['country_destination'] != 'NDF'].groupby('device')['sum'].agg(np.size)
                               })
@@ -284,7 +292,7 @@ def plot_language_time(df, device_dic, result_dic, lang_dic):
     device_df[[str2, str1]].plot.barh(stacked=True,legend=False,figsize=(12,7))
     plt.ylabel('Device type(sorted)')
     plt.xlabel('Percentage',fontsize="xx-large")
-    plt.title('Success rate on each device')
+    plt.title('Success Booking Rate of each Device')
     plt.legend(loc='lower left',bbox_to_anchor=(-0.1,-0.1))
     st.pyplot()
 
@@ -304,6 +312,7 @@ def visualization():
         """)
 
     user_date = load_data()
+    df, device_dic, result_dic, lang_dic = load_data_part2()
 
     # ===========part 1===========
     st.header("Part 1: Airbnb Travelers 101")
@@ -318,16 +327,16 @@ def visualization():
 
     # ===========part 1.2 when travelling takes place===========
     st.subheader("Part 1.2 When is the travelling taking place?")
-    options = st.multiselect('Show travelling rate of the specific countries',
+    options = st.multiselect('Select countries to view their travelling rate',
                              ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
 
     c_x = clean_data(user_date, options)
 
-    plot_line_chart(c_x, options)
+    plot_country_time_series(c_x, options)
 
-    # ===========part 1.3 who are the travels===========
+    # ===========part 1.3 who are the travellerss=========== #
     st.subheader("Part 1.3 Who are the travellers?")
-    options1 = st.multiselect('Show age of the specific countries',
+    options1 = st.multiselect('Select countries to see their age distribution',
                               ['US', 'Other', 'FR', 'CA', 'GB', 'ES', 'IT', 'DE', 'NL', 'AU', 'PT'], ['US', 'CA'])
 
     plot_age(user_date, options1)
@@ -340,14 +349,12 @@ def visualization():
                 "investigate what are similarities and differences between users who "
                 "make a successful booking vs users who do not book.")
 
-    df, device_dic, result_dic, lang_dic = load_data_part2()
-
-    st.subheader("Part 2.1")
-    st.markdown("What steps are taken for booking a travel destination?")
+    st.subheader("Part 2.1 Is there a pattern in the elapsed time of an action?")
     plot_avg_time_action_type(df, device_dic, result_dic)
 
-    st.subheader("Part 2.2")
-    st.markdown("Is there any difference in time consuming when using different languages?")
+    # ===========part 2.2 and 2.3 =========== #
+    st.subheader("Part 2.2 Delving deeper into the elapsed time")
+    st.markdown("Is there a difference in the elapsed time when using an international interface?")
     plot_language_time(df, device_dic, result_dic, lang_dic)
 
 
