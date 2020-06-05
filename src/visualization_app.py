@@ -196,7 +196,7 @@ def plot_age(user_date, cou):
     plt.legend((unk[0], fem[0], mal[0]), ('Unknown', 'Female', 'Male'), fontsize=fontsize)
     st.pyplot()
 
-@st.cache(suppress_st_warning=True)
+#@st.cache(suppress_st_warning=True)
 def load_data_part2():
     """"
     load data for part 2 visualization from session.csv and train_user_2.csv
@@ -219,19 +219,20 @@ def load_data_part2():
 
     """
 
-    s_df = pd.read_csv('./airbnb-recruiting-new-user-bookings/sessions.csv')
+    #s_df = pd.read_csv('./airbnb-recruiting-new-user-bookings/sessions.csv')
     t_df = pd.read_csv('./airbnb-recruiting-new-user-bookings/train_users_2.csv')
 
     result_dic = t_df.set_index('id')['country_destination'].to_dict()
     lang_dic = t_df.set_index('id')['language'].to_dict()
     device_dic = t_df.set_index('id')['first_device_type'].to_dict()
 
-    s_df['country_destination'] = s_df.user_id.apply(lambda x: result_dic[x] if x in result_dic.keys() else '0')
-    s_df['lang'] = s_df.user_id.apply(lambda x: lang_dic[x] if x in lang_dic.keys() else '0')
+    #s_df['country_destination'] = s_df.user_id.apply(lambda x: result_dic[x] if x in result_dic.keys() else '0')
+    #s_df['lang'] = s_df.user_id.apply(lambda x: lang_dic[x] if x in lang_dic.keys() else '0')
 
-    df = s_df[s_df['country_destination'] != '0']
+    #df = s_df[s_df['country_destination'] != '0']
 
-    return df, device_dic, result_dic, lang_dic
+    #return df, device_dic, result_dic, lang_dic
+    return device_dic, result_dic, lang_dic
 
 
 def plot_avg_time_action_type(df, device_dic, result_dic):
@@ -332,7 +333,7 @@ def plot_language_time(df, device_dic, result_dic, lang_dic):
     st.pyplot()
 
 
-def visualization():
+def visualization(df):
     # === Start Streamlit Application ===#
     st.title("Airbnb Data Analytics")
     st.image(Image.open('airbnb-recruiting-new-user-bookings/figs'
@@ -347,7 +348,7 @@ def visualization():
         """)
 
     user_date = load_data()
-    df, device_dic, result_dic, lang_dic = load_data_part2()
+    device_dic, result_dic, lang_dic = load_data_part2()
 
     # ===========part 1===========
     st.header("Part 1: Airbnb Travelers 101")
@@ -385,7 +386,7 @@ def visualization():
                 "make a successful booking vs users who do not book.")
 
 
-    df, device_dic, result_dic, lang_dic = load_data_part2()
+    #df, device_dic, result_dic, lang_dic = load_data_part2()
 
     # ===========part 2.1===========
     st.subheader("Part 2.1 Is there a pattern in the elapsed time of an action?")
