@@ -52,6 +52,7 @@ class TestDUtils():
         assert hasattr(datasets, 'users')
         assert isinstance(datasets.users, pd.DataFrame)
         datasets = load_data(TEST_CSV_DATASETS, features=True)
+        print(datasets)
         assert hasattr(datasets, 'users_feat')
         assert isinstance(datasets.users_feat, pd.DataFrame)
 

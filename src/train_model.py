@@ -11,6 +11,12 @@ Prior to running this script, please ensure the datasets have been made
 by running `make_dataset.py` under our `data` directory. The list of datasets
 are listed in the documentation of the script.
 
+Usage
+-----
+>>> DATASET_TYPE = 'merged_sessions'
+>>> XGB_MODEL = True
+>>> # then run the script using the command below
+$ python src/train_model.py
 """
 
 # Standard dist imports
@@ -61,7 +67,18 @@ RATIOS_flag = True
 CASTED_flag = True
 
 #=== BEGIN: Airbnb Recommendation ===#
-def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, xgb_model=XGB_MODEL, save=SAVE):
+def main(csv_fnames, dataset_type=DATASET_TYPE, xgb_model=XGB_MODEL, save=SAVE):
+    """ Main function for running train_model
+
+    Args:
+        csv_fnames (dict):
+        dataset_type (str):
+        xgb_model (str):
+        save (bool):
+
+    Returns:
+
+    """
 
     # Read in training set and encode labels
     start_timer = datetime.datetime.now()
@@ -169,4 +186,4 @@ def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, xgb_model=XGB_MODEL, 
     print('Completion @ {} | elapsed time: {}'.format(now, duration/datetime.timedelta(minutes=1)))
 
 if __name__ == '__main__':
-    main()
+    main(CSV_FNAMES)

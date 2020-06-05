@@ -1,7 +1,7 @@
 """Merge baselines and sessions csv
 
-# Usage
-    mergeBaselineAndSessionFeatures(
+Usage
+>>> mergeBaselineAndSessionFeatures(
         "../airbnb-recruiting-new-user-bookings/test_users-processed.csv",
         "../sessions-data/sessions-engineered.csv",
         "../airbnb-recruiting-new-user-bookings/feature-matrix.csv"

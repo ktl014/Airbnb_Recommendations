@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue May 12 23:50:37 2020
+""" Recommendation Streamlit Application
 
-@author: dguan
+Module is used to launch recommendation system.
+
+Usage
+-----
+
+>>> import streamlit as st
+>>> from src.app import recommendation
+>>> page = st.sidebar.selectbox("Choose a page", ["Homepage", "Data Analytics",
+                                              "Recommendation System"])
+>>> if page == "Homepage":
+>>>     ...
+>>> elif page == "Recommendation System":
+>>>     recommendation()
+
 """
 from datetime import datetime
 import os
@@ -36,6 +48,15 @@ LABELS = './src/data/labels.txt'
 # load dataset
 @st.cache
 def load_data_frontend(CSV_FNAMES):
+    """ Load dataset for web application
+
+    Args:
+        CSV_FNAMES (dict): Dictionary of csv absolute paths to load data from
+
+    Returns:
+        Airbnb: Named collection tuple of Airbnb dataset
+
+    """
     return load_data(CSV_FNAMES, features=True)
 
 
@@ -138,12 +159,12 @@ def run():
 
 
 def display_map(predictions):
-    """
-    display the predicted countries on the map
+    """ Display the predicted countries on the map
 
-    input: predictions
+    Args:
+        predictions (list): List of predictions
 
-    return:
+    Returns:
 
     """
 
@@ -189,6 +210,7 @@ def display_map(predictions):
 
 
 def recommendation():
+    """Activate Recommendation Streamlit Application"""
     # === Start Streamlit Application ===#
     st.title("Airbnb Recomendation System")
     st.image(Image.open('airbnb-recruiting-new-user-bookings/figs'

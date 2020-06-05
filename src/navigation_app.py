@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue May 24 14:50:37 2020
+""" Homepage for executing entire streamlit application
 
-@author: dguan
+Upon running this script, the user will be introduced to our homepage, which will
+navigate you to our featured products: the data analytics dashboard and recommendation
+system.
+
 """
 
 import sys
@@ -15,6 +17,7 @@ from src.visualization_app import visualization
 
 
 def main():
+    """Main function for activating main streamlit web applicationo"""
     page = st.sidebar.selectbox("Choose a page", ["Homepage", "Data Analytics",
                                                   "Recommendation System"])
 

@@ -12,12 +12,6 @@ Usage
 >>> session_state.favorite_color
 'black'
 
-Since you set user_name above, next time your script runs this will be the
-result:
->>> session_state = get(user_name='', favorite_color='black')
->>> session_state.user_name
-'Mary'
-
 """
 import streamlit.ReportThread as ReportThread
 from streamlit.server.Server import Server

@@ -21,7 +21,7 @@ class TestSelectModel():
     def test_main(self):
         models = [DummyClassifier(strategy='most_frequent'),
                   LogisticRegression(solver='lbfgs', multi_class='auto')]
-        assert 0 == main(CSV_FNAMES, dataset_type, models)
+        assert 0 == main(csv_fnames=CSV_FNAMES, dataset_type=dataset_type, models=models)
 
     def test_training_cv_score_model(self):
         model = DummyClassifier(strategy='most_frequent')

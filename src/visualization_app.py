@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue May 12 23:50:37 2020
-dasdasfasfdasfdasad
-@author: dguan
+""" Data Analytics Streamlit Application
+
+Module used to launch data analytics dashboard.
+
+Usage
+-----
+
+>>> import streamlit as st
+>>> from src.visualization_app import visualization
+>>> page = st.sidebar.selectbox("Choose a page", ["Homepage", "Data Analytics",
+                                              "Recommendation System"])
+>>> if page == "Homepage":
+>>>     ...
+>>> elif page == "Data Analytics":
+>>>     visualization()
+
 """
 
 import sys
@@ -18,8 +30,13 @@ from PIL import Image
 
 @st.cache(suppress_st_warning=True)
 def load_data():
-    """
-    load data from train_user_2.csv for future use in part 1
+    """ Load dataset for part 1 of our data analytics
+
+    Part 1 data analytics is based mainly off of the training set, thus this is the
+    dataset that is loaded.
+
+    Returns:
+        pd.DataFrame: Processed dataset
 
     """
     user = pd.read_csv('./airbnb-recruiting-new-user-bookings/train_users_2.csv')
@@ -55,13 +72,15 @@ def load_data():
 
 
 def clean_data(x, cou):
+    """ Clean dataframe by removing NA values and keep useful columns.
+
+    Args:
+        x (pd.DataFrame): Dataset
+        cou (list): List of countries
+
+    Returns:
+
     """
-        Clean dataframe by removing NA values and keep useful columns.
-
-        x: dataframe
-        cou: list of countries
-
-     """
 
     x = x[x['Country Destination'].isin(cou)]
     c_x = x.sort_values(['First Booking Date']).groupby(['First Booking Date', 'Country Destination']).agg(
