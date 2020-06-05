@@ -13,6 +13,8 @@ import streamlit as st
 from src.app import recommendation
 from src.visualization_app import visualization
 
+import pandas as pd
+df = pd.read_csv('./airbnb-recruiting-new-user-bookings/session_load2.csv')
 
 def main():
     page = st.sidebar.selectbox("Choose a page", ["Homepage", "Data Analytics",
@@ -41,7 +43,7 @@ def main():
         visualization()
 
     elif page == "Recommendation System":
-        recommendation()
+        recommendation(df)
 
 
 if __name__ == "__main__":
