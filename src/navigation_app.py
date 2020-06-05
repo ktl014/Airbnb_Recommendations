@@ -15,6 +15,8 @@ import streamlit as st
 from src.app import recommendation
 from src.visualization_app import visualization
 
+import pandas as pd
+df = pd.read_csv('./airbnb-recruiting-new-user-bookings/session_load2.csv')
 
 def main():
     """Main function for activating main streamlit web applicationo"""
@@ -41,7 +43,7 @@ def main():
                     "please stay tuned for our presentation!")
 
     elif page == "Data Analytics":
-        visualization()
+        visualization(df)
 
     elif page == "Recommendation System":
         recommendation()
