@@ -40,10 +40,10 @@ def main():
                     "please stay tuned for our presentation!")
 
     elif page == "Data Analytics":
-        visualization()
+        visualization(df)
 
     elif page == "Recommendation System":
-        recommendation(df)
+        recommendation()
 
 
 if __name__ == "__main__":
