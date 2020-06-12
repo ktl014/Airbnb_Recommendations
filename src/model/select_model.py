@@ -52,7 +52,7 @@ MODELS = [
     KNeighborsClassifier(n_neighbors=2)
 ]
 
-def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, models=MODELS):
+def main(csv_fnames, models, dataset_type=DATASET_TYPE):
     """ Main function for executing model selection
 
     Args:
@@ -94,11 +94,34 @@ def main(csv_fnames=CSV_FNAMES, dataset_type=DATASET_TYPE, models=MODELS):
     return 0
 
 def training_cv_score_model(X, y, model, feature_names, n_folds=10):
-    """
+    """ Compute cross validation scores for a model
+
     This function takes the design matrix and target vector of the training set,
     along with a classification estimator and computes a 10 fold cross validated
     mean and standard deviation based on balanced accuracy.
     This score is printed to the end user.
+
+    Usage
+    -----
+    >>> from sklearn.dummy import DummyClassifier
+    >>> from sklearn.linear_model import LogisticRegression
+    >>> from src.model.select_model import training_cv_score_model
+    >>> model = DummyClassifier(strategy='most_frequent')
+    >>> X, y = dataset
+    >>> feature_names = list(X.columns)
+    >>> score = training_cv_score_model(X, y, model, feature_names)
+    ('DummyClassifier', 0.275, 0.03818813079129866)
+
+    Args:
+        X (np.array): Dataset
+        y (np.array): Labels
+        model (scikit-learn): Scikit-Learn Model
+        feature_names (list): Feature names
+        n_folds (int): Number of folds
+
+    Returns:
+        tuple: (model_name, mean_score, avg_score)
+
     """
     numeric_transformer = Pipeline(steps=[
         ('scale_x_num', StandardScaler())
@@ -131,4 +154,4 @@ def training_cv_score_model(X, y, model, feature_names, n_folds=10):
     return (model_name, mean_score, avg_score)
 
 if __name__ == '__main__':
-    main()
+    main(CSV_FNAMES, MODELS)

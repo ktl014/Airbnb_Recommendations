@@ -4,11 +4,13 @@ This script features creating datasets in multiple fashions:
 - raw baseline features <--- cleaned up data prior to feature engineering
 - feature engineered datasets
 
-One can choose between the two by setting the module level constants
-```
-    do_baseline = False
-    do_merged_sessions = True
-```
+Usage
+-----
+>>> DATA_DIR = '../../airbnb-recruiting-new-user-bookings'
+>>> # Once module level constant is set for the data directory
+>>> # simply run the command below
+$ python src/make_dataset.py
+
 
 """
 # Standard Dist imports
@@ -42,6 +44,20 @@ class BaselineDataset():
 
     The BaselineDataset is set up to establish our baseline performance, by
     only using cleaned up features from the airbnb dataset.
+
+    Usage
+
+    >>> from src.data.d_utils import read_in_dataset
+    >>> from src.data.make_dataset import BaselineDataset
+    >>> do_baseline = True
+    >>> df_train = read_in_dataset(csv_fnames['train'])
+    >>> df_test = read_in_dataset(csv_fnames['test'])
+    >>> idx_train = df_train.shape[0]
+    >>> df = pd.concat((df_train, df_test), axis=0, ignore_index=True, sort=True)
+    >>> # Process the dataset into our Baseline
+    >>> drop_raw = True if do_baseline else False
+    >>> dataset = BaselineDataset(data=df, drop_raw=drop_raw)
+
     """
     def __init__(self, data, drop_raw=True):
         """Initializes BaselineDataset
@@ -159,7 +175,18 @@ class AirBnBDataset(BaselineDataset):
     """The Feature Engineered AirBnB Dataset
 
     This class is to help differentiate from our baseline as the main dataset
-    that is used to train our recommender system.
+    that is used to train our recommender system. This module inherits from the
+    `BaselineDataset` as it features the option to process baseline features if you
+    feed the module a raw dataset.
+
+    Usage
+
+    >>> # Feature engineer the dataset if we don't want to settle
+    >>> # for the BaselineDataset
+    >>> if not do_baseline:
+    >>>     PRE = 'feature_eng'
+    >>>     dataset = AirBnBDataset(dataset)
+
     """
     def __init__(self, data, process_data=False):
         """ Initializes AirBnBDataset
@@ -208,7 +235,7 @@ class AirBnBDataset(BaselineDataset):
         df = df.drop(self.dropped_raw_features, axis=1)
         return df
 
-def main(csv_fnames=CSV_FNAMES, do_baseline=False, do_merged_sessions=True):
+def main(csv_fnames, do_baseline=False, do_merged_sessions=True):
     """ Make feature engineered training and testing datasets
 
     Args:
@@ -261,4 +288,4 @@ def main(csv_fnames=CSV_FNAMES, do_baseline=False, do_merged_sessions=True):
 
 
 if __name__ == '__main__':
-    main(do_baseline=True, do_merged_sessions=False)
+    main(CSV_FNAMES, do_baseline=True, do_merged_sessions=False)

@@ -7,6 +7,7 @@ Data utilities module currently contains helper functions for the following:
 
 """
 from collections import namedtuple
+import os
 import random
 
 import pandas as pd
@@ -14,6 +15,11 @@ from tqdm import tqdm
 
 def read_in_dataset(csv_fname, raw=False, chunksize = 50000, keep_id=False, verbose=False):
     """ Read in one of the Salary datasets
+
+    Usage
+
+    >>> from src.data.d_utils import read_in_dataset
+    >>> datasets['users'] = read_in_dataset(CSV_FNAMES['val'], keep_id=True)
 
     Args:
         csv_fname (str): Abs path of the dataset (e.g. test_features.csv, train_features.csv)
@@ -54,6 +60,13 @@ def load_data(CSV_FNAMES, features=False):
     Dataset will contain at default the raw dataset. Optionally, the feature
     engineered dataset can be included by turning on the `features` argument.
 
+    Usage
+
+    >>> from src.data.d_utils import load_data
+    >>> CSV_FNAMES = {'validation': 'val_users.csv'}
+    >>> dataset = load_data(CSV_FNAMES, features=True)
+    Airbnb(users=..., users_feat=...)
+
     Args:
         CSV_FNAMES (dict): Dictionary containing csv absolute paths
         features (bool): Flag for including processed dataset. Default is False.
@@ -77,6 +90,13 @@ def load_data(CSV_FNAMES, features=False):
 def sample_data(data, id=None, test_ids=None):
     """ Sample dataset for a single instance ~ used for recommendation dashboard
 
+    Usage
+
+    >>> from src.data.d_utils import sample_data, preprocess_data
+    >>> dataset = load_data('train_users_2.csv', features=True)
+    >>> id = '87mebub9p4'
+    >>> d, id = sample_data(dataset.users_feat, id=id)
+
     Args:
         data (pd.DataFrame): Dataset
         id (str): User ID. Default is None.
@@ -98,6 +118,11 @@ def preprocess_data(data):
     Preprocessing is done here by popping the label and removing the id. Function
     largely assumes that the dataset is already processed and only needs to remove the
     label and id.
+
+    Usage
+
+    >>> d, id = sample_data(dataset.users_feat, id=id)
+    >>> X, y = preprocess_data(d)
 
     Args:
         data (pd.DataFrame): Dataset
@@ -155,13 +180,32 @@ class ExpFeatures():
             self.features += self.casted_features
 
     def get_features(self, verbose=False):
-        """Get features given finalized feature list"""
+        """ Get features given finalized feature list
+
+        Usage
+
+        >>> features = ExpFeatures(['feat1', 'feat2'], stats=True).get_features()
+        # Filter dataset for desired features
+        >>> df = df[features]
+        Args:
+            verbose (bool): Verbosity. Default is False.
+
+        Returns:
+            list: Features
+
+        """
         if verbose:
             print('Total features: {}'.format(len(self.features)))
         return self.features
 
 def experiment_features(data, stats=False, ratios=False, casted=False, verbose=False):
     """ Helper function for initializing ExpFeatures()
+
+    Usage
+
+    >>> from src.data.d_utils import read_in_dataset, experiment_features
+    >>> X = read_in_dataset()
+    >>> X_exp = experiment_features(data=X, stats=True, verbose=True)
 
     Args:
         data (pd.DataFrame): Dataset
@@ -171,6 +215,7 @@ def experiment_features(data, stats=False, ratios=False, casted=False, verbose=F
         verbose (bool): Verbosity Flag
 
     Returns:
+        pd.DataFrame: Dataset containing experimental features for ablation study
 
     """
     df = data.copy()

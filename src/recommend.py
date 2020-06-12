@@ -1,6 +1,11 @@
 """ Recommendation module
 
 Module for running model recommendation
+To execute a recommendation, module expects an input of the desired dataset and model
+weights. Loading the dataset and model will then take place. Inference is done via
+modules from `eval_model`. Postprocessing is the final step.
+
+We specifically use this within our streamlit applications to make recommendation calls.
 
 """
 from sklearn.preprocessing import LabelEncoder
@@ -26,6 +31,14 @@ COUNTRY_ABB2NAME = {
 
 def run_recommmendation(dataset, id, model_weights, full_name=False):
     """ Run model recommendations
+
+    Usage
+
+    >>> from recommend import run_recommmendation
+    >>> dataset = load_data('train_users_2.csv', features=True)
+    >>> MODEL = './models/finalized_LRmodel.sav'
+    >>> predictions, ndcg = run_recommmendation(dataset, '87mebub9p4', model_weights=MODEL)
+    {'ndcg': 0.6309297535714575}
 
     Args:
         dataset (Airbnb): Named tuple collection, Airbnb

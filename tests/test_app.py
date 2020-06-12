@@ -26,6 +26,10 @@ class TestStreamLitApp:
     def dataset(self):
         return load_data(CSV_FNAMES, features=True)
 
+    # def test_run(self):
+    #     run()
+    #     assert 0
+
     def test_recommend(self, dataset):
         expected_predictions = np.array(['NDF', 'US', 'other', 'FR', 'IT'], dtype='<U5')
         expected_ndcg = {'ndcg': 0.6309297535714575}
@@ -40,12 +44,11 @@ class TestStreamLitApp:
         assert expected_predictions == predictions
         assert expected_ndcg == ndcg
 
-
 class TestSessionState():
     def test_SessionState(self):
         session_state = SessionState(user_name='', favorite_color='black')
         assert session_state.favorite_color == 'black'
-    #
+
     # def test_get(self):
     #     session_state = get(user_name='Mary', favorite_color='black')
     #     assert 'Mary' == session_state.user_name

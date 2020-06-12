@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue May 12 23:50:37 2020
+""" Recommendation Streamlit Application
 
-@author: dguan
+Module is used to launch recommendation system.
+
+Usage
+-----
+
+>>> import streamlit as st
+>>> from src.app import recommendation
+>>> page = st.sidebar.selectbox("Choose a page", ["Homepage", "Data Analytics",
+                                              "Recommendation System"])
+>>> if page == "Homepage":
+>>>     ...
+>>> elif page == "Recommendation System":
+>>>     recommendation()
+
 """
 from datetime import datetime
 import os
@@ -10,6 +22,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from PIL import Image
 import streamlit as st
 
 from src.data.d_utils import sample_data, load_data
@@ -35,6 +48,15 @@ LABELS = './src/data/labels.txt'
 # load dataset
 @st.cache
 def load_data_frontend(CSV_FNAMES):
+    """ Load dataset for web application
+
+    Args:
+        CSV_FNAMES (dict): Dictionary of csv absolute paths to load data from
+
+    Returns:
+        Airbnb: Named collection tuple of Airbnb dataset
+
+    """
     return load_data(CSV_FNAMES, features=True)
 
 
@@ -126,7 +148,8 @@ def run():
                  f'first booking experience')
 
     else:
-        st.write("Press the above button..")
+        st.write("Press the above button to see the recommended countries on the "
+                 "world map")
 
     # === Display predictions ===#
     display_predictions(session_state.predictions)
@@ -136,12 +159,12 @@ def run():
 
 
 def display_map(predictions):
-    """
-    display the predicted countries on the map
+    """ Display the predicted countries on the map
 
-    input: predictions
+    Args:
+        predictions (list): List of predictions
 
-    return:
+    Returns:
 
     """
 
@@ -187,12 +210,16 @@ def display_map(predictions):
 
 
 def recommendation():
+    """Activate Recommendation Streamlit Application"""
     # === Start Streamlit Application ===#
     st.title("Airbnb Recomendation System")
+    st.image(Image.open('airbnb-recruiting-new-user-bookings/figs'
+                        '/recommendation_front_page.jpg'), use_column_width=True)
     st.markdown(
         """
-            This is a demo of a Streamlit app that shows Airbnb recomendation for travellers.
-            [See source code](https://github.com/streamlit/demo-uber-nyc-pickups/blob/master/app.py)
+            This is a demo of a Streamlit app that shows Airbnb recomendation for 
+            travellers.\n\nBegin by generating a random user ID for our system to give 
+            its country recommendation and relevant travel information.
         """)
     run()
 

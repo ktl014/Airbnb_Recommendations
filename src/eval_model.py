@@ -1,6 +1,13 @@
 """ Evaluate the model
 
-Main script for running evaluation and containing evaluation modules
+Main script for running evaluation and containing evaluation modules.
+
+Usage
+-----
+>>> DATASET_TYPE = 'merged_sessions'
+>>> VALIDATE_MODEL = True
+>>> # then run the script using the command below
+$ python src/eval_model.py
 
 """
 
@@ -42,7 +49,7 @@ DATASET_TYPE = 'merged_sessions'
 MODEL_WEIGHTS = '../models/finalized_LRmodel.sav'
 LABELS = './src/data/labels.txt'
 
-def main(csv_fnames=CSV_FNAMES, model_weights=MODEL_WEIGHTS, dataset_type=DATASET_TYPE,
+def main(csv_fnames, model_weights=MODEL_WEIGHTS, dataset_type=DATASET_TYPE,
          validate_model=VALIDATE_MODEL):
     """ Main function for running eval_model
 
@@ -105,11 +112,47 @@ def main(csv_fnames=CSV_FNAMES, model_weights=MODEL_WEIGHTS, dataset_type=DATASE
     sub.to_csv('sub.csv', index=False)
 
 def load_model(fname):
+    """ Load the model
+
+    Model is loaded via pickle.
+
+    Usage
+
+    >>> from src.eval_model import load_model
+    >>> # Load model
+    >>> model = load_model(model_weights)
+
+    Args:
+        fname (str): Absolute path to the saved model weights
+
+    Returns:
+        Scikit-learn: Trained model
+
+    """
     return pickle.load(open(fname, 'rb'))
 
 """Evaluation Metric Functions"""
 def plot_feature_importances(importances, feature_decoder, top_k=10, show=False):
-    """Plot feature importances for XGB/Random Forest model"""
+    """ Plot feature importances for XGB/Random Forest model
+
+    Usage
+
+    >>> from src.eval_model import plot_feature_importances
+    >>> # Plot the feature importance for parameter insights
+    >>> if xgb_model:
+    >>>     plot_feature_importances(model.feature_importances_, airbnb.idx2feature)
+
+
+    Args:
+        importances (np.array): Feature importances
+        feature_decoder (dict): Hash table of index to feature names. {idx:
+        feature_name}
+        top_k (int): Top k features to display. Default is 10.
+        show (booL): Flag for plotting figure
+
+    Returns:
+
+    """
     import matplotlib.pyplot as plt
     import numpy as np
     sorted_idx = np.argsort(importances)[::-1]
@@ -127,8 +170,26 @@ def plot_feature_importances(importances, feature_decoder, top_k=10, show=False)
     if show:
         plt.show()
 
-def evaluate_model(gtruth, predictions, verbose=True, normalize=True, beta=0):
-    """Compute all relevant evaluation metrics for a given model"""
+def evaluate_model(gtruth, predictions):
+    """ Compute all relevant evaluation metrics for a given model
+
+    Main module for taking predictions and computing a score. Scores are saved into a
+    dictionary structure, similar to TensorFlow metrics.
+
+    Usage
+
+    >>> # Evaluate classifiers
+    >>> print('Training set')
+    >>> print(evaluate_model(airbnb.y_train, airbnb.y_pred_train))
+
+    Args:
+        gtruth (list, np.array): Ground truth labels. [7, 6, 3]
+        predictions (list): Nested list of predicted labels. [[10, 7], [7, 10], [7, 10]]
+
+    Returns:
+        dict: Dictionary of evaluation metrics and their associated score.
+
+    """
     metrics = {}
     score = score_predictions(pd.DataFrame(predictions), pd.Series(gtruth))
     metrics['ndcg'] = np.mean(score)
@@ -136,11 +197,44 @@ def evaluate_model(gtruth, predictions, verbose=True, normalize=True, beta=0):
     return metrics, score
 
 def top_k_predictions(pred,k):
-    """Return top-k predictions"""
+    """ Return top-k predictions
+
+    Usage
+
+    >>> prob = model.predict_proba(airbnb.X)
+    >>> airbnb.y_pred = top_k_predictions(prob, k=5)
+
+    Args:
+        pred (list, np.array): Predicted labels. [7, 3, 3, 3]
+        k (int): Top k predictions to save
+
+    Returns:
+        list: Top k predictions
+
+    """
     return [np.argsort(pred[i])[::-1][:k].tolist() for i in range(len(pred))]
 
 def dcg_at_k(r, k, method=1):
-    """Compute discounted cumulative gain"""
+    """ Compute discounted cumulative gain
+
+    The discounted cumulative gain is a ranking quality metric, which discounts the
+    relevance of a retrieved document based off its position within a set of queries.
+
+    Usage
+
+    >>> r = pd.DataFrame(0, index=preds.index, columns=preds.columns, dtype=np.float64)
+    >>> k=5; method=1
+    >>> dcg_max = dcg_at_k(sorted(r, reverse=True), k, method)
+
+    Args:
+        r (pd.DataFrame): Predictions
+        k (int): Number of possible queries
+        method (int): Method for computing DCG
+
+    Returns:
+        float: DCG score value
+
+    """
     r = np.asfarray(r)[:k]
     if r.size:
         if method == 0:
@@ -153,7 +247,27 @@ def dcg_at_k(r, k, method=1):
 
 
 def ndcg_at_k(r, k=5, method=1):
-    """Compute normalized discounted cumulative gain"""
+    """ Compute normalized discounted cumulative gain
+
+    Variation of the DCG, but takes into emphasis the position of the result by
+    comparing it to the maximum (ideal) score.
+
+    Usage
+
+    >>> r = pd.DataFrame(0, index=preds.index, columns=preds.columns, dtype=np.float64)
+    >>> for col in preds.columns:
+    >>>     r[col] = (preds[col] == truth) * 1.0
+    >>> score = np.array(r.apply(ndcg_at_k, axis=1, result_type='reduce'))
+
+    Args:
+        r (pd.DataFrame): Predictions
+        k (int): Number of possible queries
+        method (int): Method for computing DCG
+
+    Returns:
+        float: NDCG score
+
+    """
     dcg_max = dcg_at_k(sorted(r, reverse=True), k, method)
     if not dcg_max:
         return 0.
@@ -161,12 +275,24 @@ def ndcg_at_k(r, k=5, method=1):
 
 
 def score_predictions(preds, truth, n_modes=5):
-    """
-    preds: pd.DataFrame
-      one row for each observation, one column for each prediction.
-      Columns are sorted from left to right descending in order of likelihood.
-    truth: pd.Series
-      one row for each obeservation.
+    """ Score predicted countries via NDCG
+
+    Usage
+
+    >>> score_predictions(pd.DataFrame(predictions), pd.Series(gtruth))
+    np.array([0.43067656, 1.        , 1.        ])
+
+    Args:
+        preds (pd.DataFrame): Predictions
+            one row for each observation, one column for each prediction.
+            Columns are sorted from left to right descending in order of likelihood.
+        truth (pd.Series): Ground truth
+            one row for each obeservation.
+        n_modes (int): Number of queries
+
+    Returns:
+        np.array: NDCG scores
+
     """
     assert(len(preds)==len(truth))
     r = pd.DataFrame(0, index=preds.index, columns=preds.columns, dtype=np.float64)
@@ -177,13 +303,33 @@ def score_predictions(preds, truth, n_modes=5):
     return score
 
 def predict(model, X):
-    """Run model inference and get top-k predictions"""
+    """ Run model inference and get top-k predictions
+
+    Wrapper for processing model predictions.
+
+    Usage
+
+    >>> from src.eval_model import predict, load_model, evaluate_model
+    >>> # Load model
+    >>> model = load_model(model_weights)
+    >>> # Make model inference
+    >>> # then postprocess the prediction
+    >>> predictions = predict(model, X)
+
+    Args:
+        model (scikit-learn model): Recommender model
+        X (pd.DataFrame): Dataset
+
+    Returns:
+        list: Top k predictions
+
+    """
     prob = model.predict_proba(X)
     return top_k_predictions(prob, k=5)
 
 
 def init():
   if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(CSV_FNAMES))
 
 init()
